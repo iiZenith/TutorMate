@@ -4,21 +4,22 @@ import '../../../../shared/widgets/app_button.dart';
 import '../../../../shared/widgets/app_text_field.dart';
 import '../../../../core/theme/app_spacing.dart';
 
-class LoginScreen extends StatefulWidget {
+class SignUpScreen extends StatefulWidget {
   final String role;
   
-  const LoginScreen({super.key, this.role = 'Student'});
+  const SignUpScreen({super.key, required this.role});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<SignUpScreen> createState() => _SignUpScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _SignUpScreenState extends State<SignUpScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  void _handleLogin() {
+  void _handleSignUp() {
     if (_formKey.currentState?.validate() ?? false) {
       // Mock action
       ScaffoldMessenger.of(context).showSnackBar(
@@ -29,6 +30,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   void dispose() {
+    _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
@@ -38,7 +40,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Login'),
+        title: const Text('Create Account'),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -49,17 +51,25 @@ class _LoginScreenState extends State<LoginScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  'Welcome Back',
+                  'Sign up as a ${widget.role}',
                   style: Theme.of(context).textTheme.headlineLarge,
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 Text(
-                  'Login to your ${widget.role} account.',
+                  'Join TutorMate and start your journey.',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                       ),
                 ),
                 const SizedBox(height: AppSpacing.xl),
+                AppTextField(
+                  label: 'Full Name',
+                  hint: 'Enter your full name',
+                  controller: _nameController,
+                  validator: (value) =>
+                      value == null || value.isEmpty ? 'Please enter your name' : null,
+                ),
+                const SizedBox(height: AppSpacing.md),
                 AppTextField(
                   label: 'Email',
                   hint: 'Enter your email',
@@ -71,42 +81,30 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: AppSpacing.md),
                 AppTextField(
                   label: 'Password',
-                  hint: 'Enter your password',
+                  hint: 'Create a password',
                   isPassword: true,
                   controller: _passwordController,
                   validator: (value) =>
-                      value == null || value.isEmpty ? 'Please enter your password' : null,
+                      value == null || value.isEmpty ? 'Please enter a password' : null,
                 ),
-                const SizedBox(height: AppSpacing.xs),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Forgot Password not implemented yet')),
-                      );
-                    },
-                    child: const Text('Forgot Password?'),
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.md),
+                const SizedBox(height: AppSpacing.xl),
                 AppButton(
-                  text: 'Log In',
-                  onPressed: _handleLogin,
+                  text: 'Create Account',
+                  onPressed: _handleSignUp,
                 ),
                 const SizedBox(height: AppSpacing.md),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Don\'t have an account?',
+                      'Already have an account?',
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                     TextButton(
                       onPressed: () {
-                        context.pushReplacement('/register?role=${widget.role}');
+                        context.pushReplacement('/login?role=${widget.role}');
                       },
-                      child: const Text('Sign up'),
+                      child: const Text('Log in'),
                     ),
                   ],
                 ),

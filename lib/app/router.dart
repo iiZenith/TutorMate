@@ -2,9 +2,11 @@ import 'package:go_router/go_router.dart';
 import '../features/splash/presentation/screens/splash_screen.dart';
 import '../features/home/presentation/screens/home_screen.dart';
 import '../features/auth/presentation/screens/login_screen.dart';
+import '../features/auth/presentation/screens/sign_up_screen.dart';
+import '../features/auth/presentation/screens/role_selection_screen.dart';
 
 final GoRouter appRouter = GoRouter(
-  initialLocation: '/splash',
+  initialLocation: '/role-selection', // Changed from /splash for testing the Auth flow
   routes: [
     GoRoute(
       path: '/splash',
@@ -15,13 +17,22 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) => const HomeScreen(),
     ),
     GoRoute(
-      path: '/login',
-      builder: (context, state) => const LoginScreen(),
+      path: '/role-selection',
+      builder: (context, state) => const RoleSelectionScreen(),
     ),
-    // Additional placeholder routes for future
+    GoRoute(
+      path: '/login',
+      builder: (context, state) {
+        final role = state.uri.queryParameters['role'] ?? 'Student';
+        return LoginScreen(role: role);
+      },
+    ),
     GoRoute(
       path: '/register',
-      builder: (context, state) => const LoginScreen(), // Temporary placeholder
+      builder: (context, state) {
+        final role = state.uri.queryParameters['role'] ?? 'Student';
+        return SignUpScreen(role: role);
+      },
     ),
   ],
 );
