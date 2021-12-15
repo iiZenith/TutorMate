@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../app/app.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_radii.dart';
-import '../../../../core/theme/app_colors.dart';
 
 class StudentDashboardContent extends StatelessWidget {
   const StudentDashboardContent({super.key});
@@ -10,53 +10,31 @@ class StudentDashboardContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final user = AuthProviderInherited.of(context).user;
+    final firstName = user?.fullName.split(' ').first ?? 'Student';
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(AppSpacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Alert / Notice Card
-          Card(
-            elevation: 0,
-            shape: RoundedRectangleBorder(
-              borderRadius: AppRadii.borderRadiusMedium,
-              side: BorderSide(color: AppColors.error.withValues(alpha: 0.3)),
-            ),
-            color: AppColors.error.withValues(alpha: 0.05),
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              child: Row(
-                children: [
-                  const Icon(Icons.warning_amber_rounded, color: AppColors.error),
-                  const SizedBox(width: AppSpacing.md),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Complete your profile', 
-                          style: theme.textTheme.titleMedium?.copyWith(color: AppColors.error)
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Confirm you are a genuine user (30% complete)', 
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurface.withValues(alpha: 0.7)
-                          )
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+          // Greeting & Header
+          Text(
+            'Namaste, $firstName 👋',
+            style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            'Find a Home Tutor in Kathmandu Valley',
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
             ),
           ),
           const SizedBox(height: AppSpacing.xl),
 
-          // Action Banner
+          // Primary Action Card
           Card(
-            elevation: 8,
+            elevation: 4,
             shadowColor: theme.shadowColor.withValues(alpha: 0.1),
             shape: const RoundedRectangleBorder(borderRadius: AppRadii.borderRadiusLarge),
             color: theme.colorScheme.primary,
@@ -72,15 +50,15 @@ class StudentDashboardContent extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Hire a Tutor', 
-                            style: theme.textTheme.headlineSmall?.copyWith(
+                            'Request a Home Tutor', 
+                            style: theme.textTheme.titleLarge?.copyWith(
                               color: theme.colorScheme.onPrimary, 
                               fontWeight: FontWeight.bold
                             )
                           ),
                           const SizedBox(height: AppSpacing.sm),
                           Text(
-                            'Post a requirement and find the best match for your needs.', 
+                            'Post your specific requirements and let qualified tutors reach out to you.', 
                             style: theme.textTheme.bodyMedium?.copyWith(
                               color: theme.colorScheme.onPrimary.withValues(alpha: 0.8)
                             )
@@ -88,63 +66,64 @@ class StudentDashboardContent extends StatelessWidget {
                         ],
                       ),
                     ),
-                    Icon(Icons.arrow_forward_ios, color: theme.colorScheme.onPrimary),
+                    const SizedBox(width: AppSpacing.md),
+                    Icon(Icons.arrow_forward, color: theme.colorScheme.onPrimary, size: 32),
                   ],
                 ),
               ),
             ),
           ),
+          const SizedBox(height: AppSpacing.xxl),
+          
+          Text('My Requests', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
           const SizedBox(height: AppSpacing.xl),
           
-          Text('Your Requests', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
-          const SizedBox(height: AppSpacing.md),
-          
-          // Stats Row
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _StatItem(label: 'Pending', icon: Icons.hourglass_empty, color: AppColors.warning),
-              _StatItem(label: 'Active', icon: Icons.play_circle_outline, color: AppColors.info),
-              _StatItem(label: 'Completed', icon: Icons.check_circle_outline, color: AppColors.success),
-              _StatItem(label: 'Cancelled', icon: Icons.cancel_outlined, color: AppColors.error),
-            ],
+          // Empty State for Requests
+          Center(
+            child: Column(
+              children: [
+                Icon(Icons.assignment_add, size: 64, color: theme.colorScheme.onSurface.withValues(alpha: 0.2)),
+                const SizedBox(height: AppSpacing.md),
+                Text(
+                  'You haven\'t requested any tutors yet.',
+                  style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                TextButton(
+                  onPressed: () => context.push('/hire-tutor'),
+                  child: const Text('Tap here to post your first requirement'),
+                ),
+              ],
+            ),
           ),
+          
           const SizedBox(height: AppSpacing.xxl),
+          Text('Tutor Directory', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+          const SizedBox(height: AppSpacing.xl),
+          
+          // Empty State for Directory Feed
+          Center(
+            child: Column(
+              children: [
+                Icon(Icons.people_outline, size: 64, color: theme.colorScheme.onSurface.withValues(alpha: 0.2)),
+                const SizedBox(height: AppSpacing.md),
+                Text(
+                  'Tutor directory is currently refreshing.',
+                  style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                TextButton.icon(
+                  onPressed: () {},
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Refresh Directory'),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
-    );
-  }
-}
-
-class _StatItem extends StatelessWidget {
-  final String label;
-  final IconData icon;
-  final Color color;
-
-  const _StatItem({
-    required this.label,
-    required this.icon,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.1),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(icon, color: color, size: 28),
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        Text(
-          label, 
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600)
-        ),
-      ],
     );
   }
 }

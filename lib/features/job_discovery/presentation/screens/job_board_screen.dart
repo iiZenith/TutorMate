@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_radii.dart';
 import '../../../../shared/widgets/app_button.dart';
-import '../../data/mocks/mock_jobs.dart';
-import '../../domain/models/job_request.dart';
 
 class JobBoardScreen extends StatelessWidget {
   const JobBoardScreen({super.key});
@@ -84,6 +82,8 @@ class JobBoardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Column(
       children: [
         Padding(
@@ -107,118 +107,24 @@ class JobBoardScreen extends StatelessWidget {
           ),
         ),
         Expanded(
-          child: ListView.builder(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            itemCount: mockJobs.length,
-            itemBuilder: (context, index) {
-              return _JobRequestCard(job: mockJobs[index]);
-            },
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _JobRequestCard extends StatelessWidget {
-  final JobRequest job;
-
-  const _JobRequestCard({required this.job});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    
-    return Card(
-      elevation: 4,
-      shadowColor: theme.shadowColor.withValues(alpha: 0.1),
-      margin: const EdgeInsets.only(bottom: AppSpacing.md),
-      shape: const RoundedRectangleBorder(borderRadius: AppRadii.borderRadiusLarge),
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Expanded(
-                  child: Text(
-                    job.subject,
-                    style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-                  ),
-                ),
-                if (job.isNew)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.secondary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      'NEW',
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: theme.colorScheme.secondary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.md),
-            _InfoRow(icon: Icons.location_on_outlined, text: '${job.city} - ${job.location}'),
-            const SizedBox(height: AppSpacing.xs),
-            _InfoRow(icon: Icons.person_outline, text: '${job.preferredGender} Student • ${job.gradeLevel}'),
-            const SizedBox(height: AppSpacing.xs),
-            _InfoRow(icon: Icons.account_balance_wallet_outlined, text: job.feeRange),
-            const SizedBox(height: AppSpacing.lg),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
+                Icon(Icons.search_off_rounded, size: 64, color: theme.colorScheme.onSurface.withValues(alpha: 0.2)),
+                const SizedBox(height: AppSpacing.md),
                 Text(
-                  job.timeAgo,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                  ),
+                  'No tuition jobs posted yet.',
+                  style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
+                  textAlign: TextAlign.center,
                 ),
-                ElevatedButton(
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Application opened (Mock)')),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                  ),
-                  child: const Text('Apply Now'),
+                const SizedBox(height: AppSpacing.sm),
+                TextButton.icon(
+                  onPressed: () {},
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Refresh Job Board'),
                 ),
               ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _InfoRow extends StatelessWidget {
-  final IconData icon;
-  final String text;
-
-  const _InfoRow({required this.icon, required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Row(
-      children: [
-        Icon(icon, size: 18, color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
-        const SizedBox(width: AppSpacing.sm),
-        Expanded(
-          child: Text(
-            text,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
             ),
           ),
         ),
