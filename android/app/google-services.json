@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "239482583732",
+    "project_id": "tutormatee",
+    "storage_bucket": "tutormatee.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:239482583732:android:1bb48c0d23e3030b06f5e1",
+        "android_client_info": {
+          "package_name": "com.example.tutormate"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBOxsFNspq4-7PZDqkt74zPX33PFXvItmw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../core/theme/app_theme.dart';
 import '../features/auth/presentation/providers/auth_provider.dart';
-import '../features/auth/data/repositories/mock_auth_repository.dart';
+import '../features/auth/data/repositories/firebase_auth_repository_impl.dart';
 import 'router.dart';
 
 // Provider to expose AuthProvider cleanly without 3rd-party dependencies for now
@@ -32,7 +32,7 @@ class _TutorMateAppState extends State<TutorMateApp> {
   @override
   void initState() {
     super.initState();
-    final authRepository = MockAuthRepository();
+    final authRepository = FirebaseAuthRepositoryImpl();
     _authProvider = AuthProvider(authRepository);
     _router = createAppRouter(_authProvider);
   }
