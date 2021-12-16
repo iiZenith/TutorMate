@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../app/app.dart';
 import 'tutor_dashboard_content.dart';
-import '../../../job_discovery/presentation/screens/job_board_screen.dart';
+import '../../../job_discovery/presentation/screens/find_students_screen.dart';
 import '../../../tutor_profile/presentation/screens/tutor_profile_screen.dart';
 
 class TutorMainLayout extends StatefulWidget {
@@ -16,7 +16,7 @@ class _TutorMainLayoutState extends State<TutorMainLayout> {
 
   final List<Widget> _screens = [
     const TutorDashboardContent(),
-    const JobBoardScreen(),
+    const FindStudentsScreen(),
     const Center(child: Text('Applications Screen - Coming Soon')), // Placeholder
     const TutorProfileScreen(),
   ];

@@ -9,9 +9,11 @@ import '../features/auth/presentation/providers/auth_provider.dart';
 import '../features/onboarding/presentation/screens/student_onboarding_screen.dart';
 import '../features/onboarding/presentation/screens/tutor_onboarding_screen.dart';
 import '../features/onboarding/presentation/screens/institute_onboarding_screen.dart';
-import '../features/dashboard/presentation/screens/student_dashboard_screen.dart';
 import '../features/tutor_dashboard/presentation/screens/tutor_main_layout.dart';
 import '../features/dashboard/presentation/screens/institute_dashboard_screen.dart';
+import '../features/student_dashboard/presentation/screens/student_main_layout.dart';
+import '../features/student_dashboard/presentation/screens/student_dashboard_content.dart';
+import '../features/tutor_directory/presentation/screens/find_tutors_screen.dart';
 
 GoRouter createAppRouter(AuthProvider authProvider) {
   return GoRouter(
@@ -99,7 +101,13 @@ GoRouter createAppRouter(AuthProvider authProvider) {
       ),
       GoRoute(
         path: '/dashboard/student',
-        builder: (context, state) => const StudentDashboardScreen(),
+        builder: (context, state) => const StudentMainLayout(
+          child: StudentDashboardContent(),
+        ),
+      ),
+      GoRoute(
+        path: '/find-tutors',
+        builder: (context, state) => const FindTutorsScreen(),
       ),
       GoRoute(
         path: '/dashboard/tutor',

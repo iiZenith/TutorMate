@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class JobRequestModel {
   final String jobId;
   final String studentId;
@@ -34,7 +36,7 @@ class JobRequestModel {
       'subjects': subjects,
       'budgetNpr': budgetNpr,
       'status': status,
-      'createdAt': createdAt.toIso8601String(), // Overwritten by FieldValue.serverTimestamp() dynamically
+      'createdAt': FieldValue.serverTimestamp(),
     };
   }
 
@@ -49,8 +51,8 @@ class JobRequestModel {
       subjects: List<String>.from((map['subjects'] as List?) ?? []),
       budgetNpr: (map['budgetNpr'] as num?)?.toInt() ?? 0,
       status: map['status'] as String? ?? 'open',
-      createdAt: map['createdAt'] != null
-          ? (map['createdAt'] is String ? DateTime.parse(map['createdAt']) : map['createdAt'].toDate())
+      createdAt: map['createdAt'] != null && map['createdAt'] is Timestamp
+          ? (map['createdAt'] as Timestamp).toDate()
           : DateTime.now(),
     );
   }

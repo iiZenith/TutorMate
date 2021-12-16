@@ -115,9 +115,9 @@ class StudentDashboardContent extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 TextButton.icon(
-                  onPressed: () {},
-                  icon: const Icon(Icons.refresh),
-                  label: const Text('Refresh Directory'),
+                  onPressed: () => context.push('/find-tutors'),
+                  icon: const Icon(Icons.search),
+                  label: const Text('Browse Directory'),
                 ),
               ],
             ),
