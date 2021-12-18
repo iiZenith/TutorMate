@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_radii.dart';
 import '../../../../shared/widgets/app_button.dart';
-import '../../../../shared/widgets/app_dropdown.dart';
+import '../../../../shared/widgets/dynamic_location_selector.dart';
 import '../../../../shared/widgets/app_text_field.dart';
 import '../../../job_request/domain/models/job_request_model.dart';
 import '../../../job_request/data/repositories/firebase_job_repository_impl.dart';
@@ -17,7 +17,7 @@ class FindStudentsScreen extends StatefulWidget {
 class _FindStudentsScreenState extends State<FindStudentsScreen> {
   final _repository = FirebaseJobRepositoryImpl();
   
-  String? _selectedDistrict;
+  LocationSelection _location = const LocationSelection(province: '', district: '', area: '');
   String? _selectedSubject;
   int? _minBudget;
 
@@ -31,7 +31,7 @@ class _FindStudentsScreenState extends State<FindStudentsScreen> {
   ];
 
   void _showFilterBottomSheet(BuildContext context) {
-    String? tempDistrict = _selectedDistrict;
+    LocationSelection tempLocation = _location;
     String? tempSubject = _selectedSubject;
     TextEditingController tempBudgetController = TextEditingController(text: _minBudget?.toString() ?? '');
 
@@ -74,12 +74,9 @@ class _FindStudentsScreenState extends State<FindStudentsScreen> {
                     ),
                     const SizedBox(height: AppSpacing.xl),
                     
-                    AppDropdown(
-                      label: 'District',
-                      hint: 'All Districts',
-                      value: tempDistrict,
-                      items: const ['Kathmandu', 'Lalitpur', 'Bhaktapur'],
-                      onChanged: (v) => setStateSB(() => tempDistrict = v),
+                    DynamicLocationSelector(
+                      value: tempLocation,
+                      onChanged: (v) => setStateSB(() => tempLocation = v),
                     ),
                     const SizedBox(height: AppSpacing.lg),
                     
@@ -119,7 +116,7 @@ class _FindStudentsScreenState extends State<FindStudentsScreen> {
                             isSecondary: true,
                             onPressed: () {
                               setState(() {
-                                _selectedDistrict = null;
+                                _location = const LocationSelection(province: '', district: '', area: '');
                                 _selectedSubject = null;
                                 _minBudget = null;
                               });
@@ -134,7 +131,7 @@ class _FindStudentsScreenState extends State<FindStudentsScreen> {
                             text: 'Apply Filters',
                             onPressed: () {
                               setState(() {
-                                _selectedDistrict = tempDistrict;
+                                _location = tempLocation;
                                 _selectedSubject = tempSubject;
                                 _minBudget = int.tryParse(tempBudgetController.text);
                               });
@@ -171,7 +168,7 @@ class _FindStudentsScreenState extends State<FindStudentsScreen> {
       ),
       body: StreamBuilder<List<JobRequestModel>>(
         stream: _repository.getOpenJobsStream(
-          district: _selectedDistrict,
+          district: _location.district.isNotEmpty ? _location.district : null,
           subject: _selectedSubject,
           minBudget: _minBudget,
         ),

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_radii.dart';
 import '../../../../shared/widgets/app_button.dart';
-import '../../../../shared/widgets/app_dropdown.dart';
+import '../../../../shared/widgets/dynamic_location_selector.dart';
 import '../../../../shared/widgets/app_text_field.dart';
 import '../../domain/models/tutor_model.dart';
 import '../../data/repositories/firebase_tutor_repository_impl.dart';
@@ -17,7 +17,7 @@ class FindTutorsScreen extends StatefulWidget {
 class _FindTutorsScreenState extends State<FindTutorsScreen> {
   final _repository = FirebaseTutorRepositoryImpl();
   
-  String? _selectedDistrict;
+  LocationSelection _location = const LocationSelection(province: '', district: '', area: '');
   String? _selectedSubject;
   int? _maxSalary;
 
@@ -31,7 +31,7 @@ class _FindTutorsScreenState extends State<FindTutorsScreen> {
   ];
 
   void _showFilterBottomSheet(BuildContext context) {
-    String? tempDistrict = _selectedDistrict;
+    LocationSelection tempLocation = _location;
     String? tempSubject = _selectedSubject;
     TextEditingController tempBudgetController = TextEditingController(text: _maxSalary?.toString() ?? '');
 
@@ -74,12 +74,9 @@ class _FindTutorsScreenState extends State<FindTutorsScreen> {
                     ),
                     const SizedBox(height: AppSpacing.xl),
                     
-                    AppDropdown(
-                      label: 'District',
-                      hint: 'All Districts',
-                      value: tempDistrict,
-                      items: const ['Kathmandu', 'Lalitpur', 'Bhaktapur'],
-                      onChanged: (v) => setStateSB(() => tempDistrict = v),
+                    DynamicLocationSelector(
+                      value: tempLocation,
+                      onChanged: (v) => setStateSB(() => tempLocation = v),
                     ),
                     const SizedBox(height: AppSpacing.lg),
                     
@@ -119,7 +116,7 @@ class _FindTutorsScreenState extends State<FindTutorsScreen> {
                             isSecondary: true,
                             onPressed: () {
                               setState(() {
-                                _selectedDistrict = null;
+                                _location = const LocationSelection(province: '', district: '', area: '');
                                 _selectedSubject = null;
                                 _maxSalary = null;
                               });
@@ -134,7 +131,7 @@ class _FindTutorsScreenState extends State<FindTutorsScreen> {
                             text: 'Apply Filters',
                             onPressed: () {
                               setState(() {
-                                _selectedDistrict = tempDistrict;
+                                _location = tempLocation;
                                 _selectedSubject = tempSubject;
                                 _maxSalary = int.tryParse(tempBudgetController.text);
                               });
@@ -171,7 +168,7 @@ class _FindTutorsScreenState extends State<FindTutorsScreen> {
       ),
       body: StreamBuilder<List<TutorModel>>(
         stream: _repository.getTutorsStream(
-          district: _selectedDistrict,
+          district: _location.district.isNotEmpty ? _location.district : null,
           subject: _selectedSubject,
           maxSalary: _maxSalary,
         ),

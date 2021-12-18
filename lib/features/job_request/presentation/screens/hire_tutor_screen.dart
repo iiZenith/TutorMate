@@ -5,6 +5,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../shared/widgets/app_button.dart';
 import '../../../../shared/widgets/app_dropdown.dart';
 import '../../../../shared/widgets/app_text_field.dart';
+import '../../../../shared/widgets/dynamic_location_selector.dart';
 import '../../domain/models/job_request_model.dart';
 import '../../data/repositories/firebase_job_repository_impl.dart';
 
@@ -20,8 +21,7 @@ class _HireTutorScreenState extends State<HireTutorScreen> {
   final _jobRepository = FirebaseJobRepositoryImpl();
   final _budgetController = TextEditingController();
 
-  String? _selectedDistrict;
-  String? _selectedArea;
+  LocationSelection _location = const LocationSelection(province: '', district: '', area: '');
   String? _selectedGrade;
   
   final List<String> _selectedSubjects = [];
@@ -54,8 +54,8 @@ class _HireTutorScreenState extends State<HireTutorScreen> {
         jobId: '', // Handled dynamically in repo
         studentId: user.id,
         studentName: user.fullName,
-        district: _selectedDistrict ?? '',
-        area: _selectedArea ?? '',
+        district: _location.district,
+        area: _location.area,
         grade: _selectedGrade ?? '',
         subjects: _selectedSubjects,
         budgetNpr: int.tryParse(_budgetController.text) ?? 0,
@@ -112,31 +112,16 @@ class _HireTutorScreenState extends State<HireTutorScreen> {
                 ),
                 const SizedBox(height: AppSpacing.xl),
 
-                // 1. District
-                AppDropdown(
-                  label: 'District',
-                  hint: 'Select your district',
-                  value: _selectedDistrict,
-                  items: const ['Kathmandu', 'Lalitpur', 'Bhaktapur'],
-                  onChanged: (v) => setState(() {
-                    _selectedDistrict = v;
-                    _selectedArea = null; // reset area when district changes
-                  }),
+                // 1. Dynamic Location Selector
+                DynamicLocationSelector(
+                  value: _location,
+                  onChanged: (v) => setState(() => _location = v),
                 ),
-                const SizedBox(height: AppSpacing.md),
-
-                // 2. Area
-                AppDropdown(
-                  label: 'Area/Location',
-                  hint: 'Select your local area',
-                  value: _selectedArea,
-                  items: _selectedDistrict == 'Lalitpur'
-                      ? ['Patan', 'Jhamsikhel', 'Bhaisepati']
-                      : _selectedDistrict == 'Bhaktapur'
-                          ? ['Suryabinayak', 'Thimi']
-                          : ['Manamaiju', 'Tarkeshwar', 'Baneshwor', 'Koteshwor'],
-                  onChanged: (v) => setState(() => _selectedArea = v),
-                ),
+                if (_location.district.isEmpty || _location.area.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4, left: 16),
+                    child: Text('Location is required', style: TextStyle(color: theme.colorScheme.error, fontSize: 12)),
+                  ),
                 const SizedBox(height: AppSpacing.md),
 
                 // 3. Grade

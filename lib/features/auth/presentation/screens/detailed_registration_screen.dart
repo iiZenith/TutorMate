@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../shared/widgets/auth_floating_card_layout.dart';
 import '../../../../shared/widgets/app_button.dart';
 import '../../../../shared/widgets/app_text_field.dart';
-import '../../../../shared/widgets/app_dropdown.dart';
+import '../../../../shared/widgets/dynamic_location_selector.dart';
 import '../../../../shared/widgets/app_radio_group.dart';
 import '../../../../app/app.dart';
 import '../../domain/models/user_role.dart';
@@ -27,11 +27,10 @@ class _DetailedRegistrationScreenState extends State<DetailedRegistrationScreen>
   final _nameController = TextEditingController();
   late TextEditingController _emailController;
   final _phoneController = TextEditingController();
-  final _areaController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   
-  String? _selectedCity;
+  LocationSelection _location = const LocationSelection(province: '', district: '', area: '');
   String _selectedGender = 'Other';
   bool _agreeToTerms = false;
 
@@ -103,17 +102,9 @@ class _DetailedRegistrationScreenState extends State<DetailedRegistrationScreen>
               validator: (v) => v!.isEmpty ? 'Required' : null
             ),
             const SizedBox(height: 16),
-            AppDropdown(
-              label: 'City',
-              hint: 'Select your city',
-              value: _selectedCity,
-              items: const ['Kathmandu', 'Lalitpur', 'Bhaktapur', 'Pokhara', 'Chitwan'],
-              onChanged: (v) => setState(() => _selectedCity = v),
-            ),
-            const SizedBox(height: 16),
-            AppTextField(
-              label: 'Location / Area', 
-              controller: _areaController
+            DynamicLocationSelector(
+              value: _location,
+              onChanged: (v) => setState(() => _location = v),
             ),
             const SizedBox(height: 16),
             AppRadioGroup(
