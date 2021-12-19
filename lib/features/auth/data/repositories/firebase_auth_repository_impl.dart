@@ -18,9 +18,18 @@ class FirebaseAuthRepositoryImpl implements AuthRepository {
         _cachedUser = null;
         return null;
       }
-      final appUser = await _fetchAppUser(fbUser.uid);
-      _cachedUser = appUser;
-      return appUser;
+      try {
+        final appUser = await _fetchAppUser(fbUser.uid);
+        if (appUser == null) {
+          throw const AuthException('User profile not found in database.');
+        }
+        _cachedUser = appUser;
+        return appUser;
+      } catch (e) {
+        // If we fail to fetch the profile, we throw so the stream emits an error,
+        // rather than returning null (which implies logged out).
+        throw AuthException(e is AuthException ? e.message : 'Error loading user profile.');
+      }
     });
   }
 
@@ -28,21 +37,31 @@ class FirebaseAuthRepositoryImpl implements AuthRepository {
   AppUser? get currentUser => _cachedUser;
 
   Future<AppUser?> _fetchAppUser(String uid) async {
-    try {
-      final doc = await _firestore.collection('users').doc(uid).get();
-      if (!doc.exists) return null;
-      final data = doc.data()!;
-      return AppUser(
-        id: uid,
-        email: data['email'] ?? '',
-        fullName: data['fullName'] ?? '',
-        role: UserRole.fromString(data['role'] ?? 'Student'),
-        isProfileComplete: data['isProfileComplete'] ?? false,
-        createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      );
-    } catch (e) {
-      return null;
+    final doc = await _firestore.collection('users').doc(uid).get();
+    if (!doc.exists) return null;
+    final data = doc.data()!;
+    final roleStr = data['role'] as String?;
+    final parsedRole = UserRole.fromString(roleStr);
+    if (parsedRole == null) {
+      throw const AuthException('Invalid or missing user role.');
     }
+
+    final fbUser = _firebaseAuth.currentUser;
+    final isEmailVerified = fbUser?.emailVerified ?? false;
+
+    return AppUser(
+      id: uid,
+      email: data['email'] ?? '',
+      fullName: data['fullName'] ?? '',
+      phoneNumber: data['phoneNumber'] as String?,
+      gender: data['gender'] as String?,
+      district: data['district'] as String?,
+      area: data['area'] as String?,
+      role: parsedRole,
+      isEmailVerified: isEmailVerified,
+      isProfileComplete: data['isProfileComplete'] ?? false,
+      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+    );
   }
 
   @override
@@ -74,6 +93,10 @@ class FirebaseAuthRepositoryImpl implements AuthRepository {
     required String email,
     required String password,
     required UserRole role,
+    String? phoneNumber,
+    String? gender,
+    String? district,
+    String? area,
   }) async {
     try {
       final credential = await _firebaseAuth.createUserWithEmailAndPassword(
@@ -87,6 +110,10 @@ class FirebaseAuthRepositoryImpl implements AuthRepository {
         id: uid,
         email: email,
         fullName: fullName,
+        phoneNumber: phoneNumber,
+        gender: gender,
+        district: district,
+        area: area,
         role: role,
         isProfileComplete: false,
         createdAt: DateTime.now(),
@@ -97,6 +124,10 @@ class FirebaseAuthRepositoryImpl implements AuthRepository {
         'id': uid,
         'email': email,
         'fullName': fullName,
+        'phoneNumber': phoneNumber,
+        'gender': gender,
+        'district': district,
+        'area': area,
         'role': role.name,
         'isProfileComplete': false,
         'createdAt': FieldValue.serverTimestamp(),

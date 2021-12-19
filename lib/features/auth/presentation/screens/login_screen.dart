@@ -69,8 +69,11 @@ class _LoginScreenState extends State<LoginScreen> {
               hint: 'Enter your email',
               keyboardType: TextInputType.emailAddress,
               controller: _emailController,
-              validator: (value) =>
-                  value == null || value.isEmpty ? 'Please enter your email' : null,
+              validator: (v) {
+                if (v == null || v.isEmpty) return 'Please enter your email';
+                if (!v.contains('@') || !v.contains('.')) return 'Invalid email format';
+                return null;
+              },
             ),
             const SizedBox(height: 16),
             AppTextField(
@@ -84,10 +87,28 @@ class _LoginScreenState extends State<LoginScreen> {
             Align(
               alignment: Alignment.centerRight,
               child: TextButton(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Forgot Password not implemented yet')),
-                  );
+                onPressed: () async {
+                  final email = _emailController.text.trim();
+                  if (email.isEmpty || !email.contains('@')) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Please enter a valid email address first.')),
+                    );
+                    return;
+                  }
+                  try {
+                    await authProvider.sendPasswordReset(email);
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Password reset email sent. Please check your inbox.')),
+                      );
+                    }
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))),
+                      );
+                    }
+                  }
                 },
                 child: const Text('Forgot Password?'),
               ),

@@ -55,12 +55,24 @@ class _DetailedRegistrationScreenState extends State<DetailedRegistrationScreen>
       return;
     }
 
+    final parsedRole = UserRole.fromString(widget.role);
+    if (parsedRole == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Invalid role selected'))
+      );
+      return;
+    }
+
     final authProvider = AuthProviderInherited.of(context);
     await authProvider.register(
       _nameController.text.trim(),
       _emailController.text.trim(),
       _passwordController.text,
-      UserRole.fromString(widget.role),
+      parsedRole,
+      phoneNumber: _phoneController.text.trim(),
+      gender: _selectedGender,
+      district: _location.district,
+      area: _location.area,
     );
 
     if (mounted && authProvider.errorMessage != null) {
@@ -99,7 +111,11 @@ class _DetailedRegistrationScreenState extends State<DetailedRegistrationScreen>
               label: 'Email Address', 
               controller: _emailController, 
               keyboardType: TextInputType.emailAddress, 
-              validator: (v) => v!.isEmpty ? 'Required' : null
+              validator: (v) {
+                if (v == null || v.isEmpty) return 'Required';
+                if (!v.contains('@') || !v.contains('.')) return 'Invalid email format';
+                return null;
+              }
             ),
             const SizedBox(height: 16),
             DynamicLocationSelector(

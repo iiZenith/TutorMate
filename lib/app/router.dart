@@ -2,6 +2,7 @@ import 'package:go_router/go_router.dart';
 import '../features/splash/presentation/screens/splash_screen.dart';
 import '../features/auth/domain/models/user_role.dart';
 import '../features/auth/presentation/screens/login_screen.dart';
+import '../features/auth/presentation/screens/auth_error_screen.dart';
 import '../features/auth/presentation/screens/landing_screen.dart';
 import '../features/auth/presentation/screens/quick_entry_screen.dart';
 import '../features/auth/presentation/screens/detailed_registration_screen.dart';
@@ -13,6 +14,7 @@ import '../features/tutor_dashboard/presentation/screens/tutor_main_layout.dart'
 import '../features/dashboard/presentation/screens/institute_dashboard_screen.dart';
 import '../features/student_dashboard/presentation/screens/student_main_layout.dart';
 import '../features/student_dashboard/presentation/screens/student_dashboard_content.dart';
+import '../features/job_request/presentation/screens/hire_tutor_screen.dart';
 import '../features/tutor_directory/presentation/screens/find_tutors_screen.dart';
 
 GoRouter createAppRouter(AuthProvider authProvider) {
@@ -30,6 +32,11 @@ GoRouter createAppRouter(AuthProvider authProvider) {
         return '/splash';
       }
 
+      if (authState == AuthState.error) {
+        if (state.matchedLocation != '/auth-error') return '/auth-error';
+        return null;
+      }
+
       if (authState == AuthState.unauthenticated) {
         if (!isGoingToAuth) return '/landing';
         return null;
@@ -45,12 +52,20 @@ GoRouter createAppRouter(AuthProvider authProvider) {
 
       if (authState == AuthState.authenticated) {
         final role = authProvider.user?.role;
-        final isGoingToDashboard = state.matchedLocation.startsWith('/dashboard');
-        
-        if (!isGoingToDashboard) {
-           if (role == UserRole.studentGuardian) return '/dashboard/student';
-           if (role == UserRole.tutor) return '/dashboard/tutor';
-           if (role == UserRole.institute) return '/dashboard/institute';
+        final loc = state.matchedLocation;
+
+        if (role == UserRole.studentGuardian) {
+          if (!loc.startsWith('/dashboard/student') && loc != '/find-tutors' && loc != '/hire-tutor') {
+            return '/dashboard/student';
+          }
+        } else if (role == UserRole.tutor) {
+          if (!loc.startsWith('/dashboard/tutor')) {
+            return '/dashboard/tutor';
+          }
+        } else if (role == UserRole.institute) {
+          if (!loc.startsWith('/dashboard/institute')) {
+            return '/dashboard/institute';
+          }
         }
       }
 
@@ -60,6 +75,10 @@ GoRouter createAppRouter(AuthProvider authProvider) {
       GoRoute(
         path: '/splash',
         builder: (context, state) => const SplashScreen(),
+      ),
+      GoRoute(
+        path: '/auth-error',
+        builder: (context, state) => const AuthErrorScreen(),
       ),
       GoRoute(
         path: '/landing',
@@ -104,6 +123,10 @@ GoRouter createAppRouter(AuthProvider authProvider) {
         builder: (context, state) => const StudentMainLayout(
           child: StudentDashboardContent(),
         ),
+      ),
+      GoRoute(
+        path: '/hire-tutor',
+        builder: (context, state) => const HireTutorScreen(),
       ),
       GoRoute(
         path: '/find-tutors',

@@ -16,6 +16,10 @@ abstract class AuthRepository {
     required String email,
     required String password,
     required UserRole role,
+    String? phoneNumber,
+    String? gender,
+    String? district,
+    String? area,
   });
   
   Future<void> sendPasswordResetEmail({required String email});

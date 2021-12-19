@@ -42,14 +42,24 @@ class AuthProvider extends ChangeNotifier {
         _state = AuthState.authenticated;
       }
       notifyListeners();
+    }, onError: (error) {
+      _user = null;
+      _state = AuthState.error;
+      _errorMessage = error.toString();
+      notifyListeners();
     });
     
     // Set initial state
-    if (_repository.currentUser == null) {
-      _state = AuthState.unauthenticated;
-    } else {
-      _user = _repository.currentUser;
-      _state = _user!.isProfileComplete ? AuthState.authenticated : AuthState.needsOnboarding;
+    try {
+      if (_repository.currentUser == null) {
+        _state = AuthState.unauthenticated;
+      } else {
+        _user = _repository.currentUser;
+        _state = _user!.isProfileComplete ? AuthState.authenticated : AuthState.needsOnboarding;
+      }
+    } catch (e) {
+      _state = AuthState.error;
+      _errorMessage = e.toString();
     }
     notifyListeners();
   }
@@ -79,7 +89,16 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> register(String fullName, String email, String password, UserRole role) async {
+  Future<void> register(
+    String fullName, 
+    String email, 
+    String password, 
+    UserRole role, {
+    String? phoneNumber,
+    String? gender,
+    String? district,
+    String? area,
+  }) async {
     _setLoading();
     try {
       await _repository.registerWithEmailAndPassword(
@@ -87,6 +106,10 @@ class AuthProvider extends ChangeNotifier {
         email: email,
         password: password,
         role: role,
+        phoneNumber: phoneNumber,
+        gender: gender,
+        district: district,
+        area: area,
       );
       // The stream listener will handle the state update
     } catch (e) {
@@ -100,6 +123,15 @@ class AuthProvider extends ChangeNotifier {
       await _repository.signOut();
     } catch (e) {
       _setError(e.toString());
+    }
+  }
+
+  Future<void> sendPasswordReset(String email) async {
+    try {
+      await _repository.sendPasswordResetEmail(email: email);
+    } catch (e) {
+      // Re-throw so UI can show a snackbar instead of changing the global state to error
+      throw Exception(e.toString());
     }
   }
 

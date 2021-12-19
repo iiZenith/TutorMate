@@ -20,10 +20,14 @@ enum UserRole {
     required this.description,
   });
 
-  static UserRole fromString(String roleStr) {
-    return UserRole.values.firstWhere(
-      (e) => e.name.toLowerCase() == roleStr.toLowerCase() || e.label.toLowerCase() == roleStr.toLowerCase(),
-      orElse: () => UserRole.studentGuardian,
-    );
+  static UserRole? fromString(String? roleStr) {
+    if (roleStr == null || roleStr.isEmpty) return null;
+    try {
+      return UserRole.values.firstWhere(
+        (e) => e.name.toLowerCase() == roleStr.toLowerCase() || e.label.toLowerCase() == roleStr.toLowerCase()
+      );
+    } catch (_) {
+      return null;
+    }
   }
 }
