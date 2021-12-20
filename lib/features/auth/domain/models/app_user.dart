@@ -14,6 +14,24 @@ class AppUser {
   final DateTime createdAt;
   final String? avatarUrl;
 
+  // Student specific
+  final String? studentType;
+  final String? studentGradeLevel;
+  final List<String> subjects;
+
+  // Tutor specific
+  final String? headline;
+  final String? bio;
+  final List<String> teachingLevels;
+  final int? expectedMonthlyRate;
+  final int? expectedHourlyRate;
+  final String? highestQualification;
+  final String? institution;
+  final int? experienceYears;
+  final String? verificationStatus;
+  final String? citizenshipUrl;
+  final String? transcriptUrl;
+
   const AppUser({
     required this.id,
     required this.email,
@@ -27,6 +45,20 @@ class AppUser {
     this.isProfileComplete = false,
     required this.createdAt,
     this.avatarUrl,
+    this.studentType,
+    this.studentGradeLevel,
+    this.subjects = const [],
+    this.headline,
+    this.bio,
+    this.teachingLevels = const [],
+    this.expectedMonthlyRate,
+    this.expectedHourlyRate,
+    this.highestQualification,
+    this.institution,
+    this.experienceYears,
+    this.verificationStatus,
+    this.citizenshipUrl,
+    this.transcriptUrl,
   });
 
   AppUser copyWith({
@@ -42,6 +74,20 @@ class AppUser {
     bool? isProfileComplete,
     DateTime? createdAt,
     String? avatarUrl,
+    String? studentType,
+    String? studentGradeLevel,
+    List<String>? subjects,
+    String? headline,
+    String? bio,
+    List<String>? teachingLevels,
+    int? expectedMonthlyRate,
+    int? expectedHourlyRate,
+    String? highestQualification,
+    String? institution,
+    int? experienceYears,
+    String? verificationStatus,
+    String? citizenshipUrl,
+    String? transcriptUrl,
   }) {
     return AppUser(
       id: id ?? this.id,
@@ -56,6 +102,20 @@ class AppUser {
       isProfileComplete: isProfileComplete ?? this.isProfileComplete,
       createdAt: createdAt ?? this.createdAt,
       avatarUrl: avatarUrl ?? this.avatarUrl,
+      studentType: studentType ?? this.studentType,
+      studentGradeLevel: studentGradeLevel ?? this.studentGradeLevel,
+      subjects: subjects ?? this.subjects,
+      headline: headline ?? this.headline,
+      bio: bio ?? this.bio,
+      teachingLevels: teachingLevels ?? this.teachingLevels,
+      expectedMonthlyRate: expectedMonthlyRate ?? this.expectedMonthlyRate,
+      expectedHourlyRate: expectedHourlyRate ?? this.expectedHourlyRate,
+      highestQualification: highestQualification ?? this.highestQualification,
+      institution: institution ?? this.institution,
+      experienceYears: experienceYears ?? this.experienceYears,
+      verificationStatus: verificationStatus ?? this.verificationStatus,
+      citizenshipUrl: citizenshipUrl ?? this.citizenshipUrl,
+      transcriptUrl: transcriptUrl ?? this.transcriptUrl,
     );
   }
 }

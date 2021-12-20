@@ -61,6 +61,20 @@ class FirebaseAuthRepositoryImpl implements AuthRepository {
       isEmailVerified: isEmailVerified,
       isProfileComplete: data['isProfileComplete'] ?? false,
       createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      studentType: data['studentType'] as String?,
+      studentGradeLevel: data['studentGradeLevel'] as String?,
+      subjects: List<String>.from(data['subjects'] ?? []),
+      headline: data['headline'] as String?,
+      bio: data['bio'] as String?,
+      teachingLevels: List<String>.from(data['teachingLevels'] ?? []),
+      expectedMonthlyRate: (data['expectedMonthlyRate'] as num?)?.toInt(),
+      expectedHourlyRate: (data['expectedHourlyRate'] as num?)?.toInt(),
+      highestQualification: data['highestQualification'] as String?,
+      institution: data['institution'] as String?,
+      experienceYears: (data['experienceYears'] as num?)?.toInt(),
+      verificationStatus: data['verificationStatus'] as String?,
+      citizenshipUrl: data['citizenshipUrl'] as String?,
+      transcriptUrl: data['transcriptUrl'] as String?,
     );
   }
 
@@ -104,7 +118,12 @@ class FirebaseAuthRepositoryImpl implements AuthRepository {
         password: password,
       );
       
-      final uid = credential.user!.uid;
+      final fbUser = credential.user!;
+      if (!fbUser.emailVerified) {
+        await fbUser.sendEmailVerification();
+      }
+      
+      final uid = fbUser.uid;
       
       final appUser = AppUser(
         id: uid,
@@ -150,6 +169,35 @@ class FirebaseAuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<void> sendEmailVerification() async {
+    try {
+      final fbUser = _firebaseAuth.currentUser;
+      if (fbUser != null && !fbUser.emailVerified) {
+        await fbUser.sendEmailVerification();
+      }
+    } on fb_auth.FirebaseAuthException catch (e) {
+      _throwMappedException(e);
+    }
+  }
+
+  @override
+  Future<void> reloadAuthUser() async {
+    try {
+      final fbUser = _firebaseAuth.currentUser;
+      if (fbUser != null) {
+        await fbUser.reload();
+        // After reload, fetch app user again to update the cache and trigger stream if needed.
+        // Actually, just fetching app user and assigning it is enough, but to trigger stream we might need to manually add if we had a controller.
+        // Since we map authStateChanges, reload doesn't always fire it. 
+        final appUser = await _fetchAppUser(fbUser.uid);
+        _cachedUser = appUser;
+      }
+    } catch (e) {
+      throw AuthException(e.toString());
+    }
+  }
+
+  @override
   Future<void> signOut() async {
     await _firebaseAuth.signOut();
     _cachedUser = null;
@@ -172,6 +220,81 @@ class FirebaseAuthRepositoryImpl implements AuthRepository {
       return user;
     } catch (e) {
       throw AuthException(e.toString());
+    }
+  }
+
+  @override
+  Future<void> updateStudentProfile({
+    required String userId,
+    required String studentType,
+    required String studentGradeLevel,
+    required List<String> subjects,
+    required String district,
+    required String area,
+  }) async {
+    try {
+      await _firestore.collection('users').doc(userId).update({
+        'studentType': studentType,
+        'studentGradeLevel': studentGradeLevel,
+        'subjects': subjects,
+        'district': district,
+        'area': area,
+        'isProfileComplete': true,
+      });
+      _cachedUser = await _fetchAppUser(userId);
+    } catch (e) {
+      throw AuthException('Failed to update student profile: $e');
+    }
+  }
+
+  @override
+  Future<void> updateTutorProfile({
+    required String userId,
+    String? fullName,
+    String? email,
+    String? phoneNumber,
+    String? district,
+    String? area,
+    String? headline,
+    String? bio,
+    List<String>? teachingLevels,
+    List<String>? subjects,
+    int? expectedMonthlyRate,
+    int? expectedHourlyRate,
+    String? highestQualification,
+    String? institution,
+    int? experienceYears,
+    String? verificationStatus,
+    String? citizenshipUrl,
+    String? transcriptUrl,
+    bool? isProfileComplete,
+  }) async {
+    try {
+      final updates = <String, dynamic>{};
+      if (fullName != null) updates['fullName'] = fullName;
+      if (phoneNumber != null) updates['phoneNumber'] = phoneNumber;
+      if (district != null) updates['district'] = district;
+      if (area != null) updates['area'] = area;
+      if (headline != null) updates['headline'] = headline;
+      if (bio != null) updates['bio'] = bio;
+      if (teachingLevels != null) updates['teachingLevels'] = teachingLevels;
+      if (subjects != null) updates['subjects'] = subjects;
+      if (expectedMonthlyRate != null) updates['expectedMonthlyRate'] = expectedMonthlyRate;
+      if (expectedHourlyRate != null) updates['expectedHourlyRate'] = expectedHourlyRate;
+      if (highestQualification != null) updates['highestQualification'] = highestQualification;
+      if (institution != null) updates['institution'] = institution;
+      if (experienceYears != null) updates['experienceYears'] = experienceYears;
+      if (verificationStatus != null) updates['verificationStatus'] = verificationStatus;
+      if (citizenshipUrl != null) updates['citizenshipUrl'] = citizenshipUrl;
+      if (transcriptUrl != null) updates['transcriptUrl'] = transcriptUrl;
+      if (isProfileComplete != null) updates['isProfileComplete'] = isProfileComplete;
+
+      if (updates.isNotEmpty) {
+        await _firestore.collection('users').doc(userId).update(updates);
+        _cachedUser = await _fetchAppUser(userId);
+      }
+    } catch (e) {
+      throw AuthException('Failed to update tutor profile: $e');
     }
   }
 

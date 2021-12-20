@@ -24,11 +24,46 @@ abstract class AuthRepository {
   
   Future<void> sendPasswordResetEmail({required String email});
   
+  Future<void> sendEmailVerification();
+  
+  Future<void> reloadAuthUser();
+  
   Future<void> signOut();
   
   Future<AppUser> updateProfileCompletionStatus({
     required String userId,
     required bool isComplete,
+  });
+
+  Future<void> updateStudentProfile({
+    required String userId,
+    required String studentType,
+    required String studentGradeLevel,
+    required List<String> subjects,
+    required String district,
+    required String area,
+  });
+
+  Future<void> updateTutorProfile({
+    required String userId,
+    String? fullName,
+    String? email,
+    String? phoneNumber,
+    String? district,
+    String? area,
+    String? headline,
+    String? bio,
+    List<String>? teachingLevels,
+    List<String>? subjects,
+    int? expectedMonthlyRate,
+    int? expectedHourlyRate,
+    String? highestQualification,
+    String? institution,
+    int? experienceYears,
+    String? verificationStatus,
+    String? citizenshipUrl,
+    String? transcriptUrl,
+    bool? isProfileComplete,
   });
 }
 

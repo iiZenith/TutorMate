@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_radii.dart';
 import '../../../../app/app.dart';
@@ -69,9 +70,14 @@ class _MyRequestsScreenState extends State<MyRequestsScreen> {
               shadowColor: theme.shadowColor.withValues(alpha: 0.1),
               margin: const EdgeInsets.only(bottom: AppSpacing.md),
               shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(AppRadii.large))),
-              child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.lg),
-                child: Column(
+              child: InkWell(
+                onTap: () {
+                  context.push('/request-details', extra: job);
+                },
+                borderRadius: const BorderRadius.all(Radius.circular(AppRadii.large)),
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
@@ -111,10 +117,11 @@ class _MyRequestsScreenState extends State<MyRequestsScreen> {
                   ],
                 ),
               ),
-            );
-          },
-        );
-      },
+            ),
+          );
+        },
+      );
+    },
     );
   }
 }

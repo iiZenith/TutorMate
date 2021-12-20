@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/app.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_radii.dart';
+import '../../../job_request/data/repositories/firebase_job_repository_impl.dart';
+import '../../../job_request/domain/models/job_request_model.dart';
 
 class StudentDashboardContent extends StatelessWidget {
   const StudentDashboardContent({super.key});
@@ -25,7 +27,7 @@ class StudentDashboardContent extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
-            'Find a Home Tutor in Kathmandu Valley',
+            'Find a Home Tutor in your area',
             style: theme.textTheme.bodyLarge?.copyWith(
               color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
             ),
@@ -75,52 +77,77 @@ class StudentDashboardContent extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.xxl),
           
-          Text('My Requests', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
-          const SizedBox(height: AppSpacing.xl),
+          Text('My Recent Requests', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+          const SizedBox(height: AppSpacing.md),
           
-          // Empty State for Requests
-          Center(
-            child: Column(
-              children: [
-                Icon(Icons.assignment_add, size: 64, color: theme.colorScheme.onSurface.withValues(alpha: 0.2)),
-                const SizedBox(height: AppSpacing.md),
-                Text(
-                  'You haven\'t requested any tutors yet.',
-                  style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                TextButton(
-                  onPressed: () => context.push('/hire-tutor'),
-                  child: const Text('Tap here to post your first requirement'),
-                ),
-              ],
-            ),
+          StreamBuilder<List<JobRequestModel>>(
+            stream: user != null ? FirebaseJobRepositoryImpl().getMyRequestsStream(user.id) : const Stream.empty(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (snapshot.hasError) {
+                return const Center(child: Text('Error loading requests.'));
+              }
+              
+              final requests = snapshot.data ?? [];
+              if (requests.isEmpty) {
+                return Center(
+                  child: Column(
+                    children: [
+                      const SizedBox(height: AppSpacing.md),
+                      Icon(Icons.assignment_add, size: 48, color: theme.colorScheme.onSurface.withValues(alpha: 0.2)),
+                      const SizedBox(height: AppSpacing.sm),
+                      Text(
+                        'You haven\'t requested any tutors yet.',
+                        style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      TextButton(
+                        onPressed: () => context.push('/hire-tutor'),
+                        child: const Text('Tap here to post your first requirement'),
+                      ),
+                    ],
+                  ),
+                );
+              }
+              
+              return ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: requests.length > 3 ? 3 : requests.length,
+                itemBuilder: (context, index) {
+                  final job = requests[index];
+                  return Card(
+                    margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+                    child: ListTile(
+                      title: Text(job.subjects.join(', ')),
+                      subtitle: Text('Status: ${job.status.toUpperCase()}'),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => context.push('/my-requests'),
+                    ),
+                  );
+                },
+              );
+            },
           ),
           
           const SizedBox(height: AppSpacing.xxl),
-          Text('Tutor Directory', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
-          const SizedBox(height: AppSpacing.xl),
-          
-          // Empty State for Directory Feed
-          Center(
-            child: Column(
-              children: [
-                Icon(Icons.people_outline, size: 64, color: theme.colorScheme.onSurface.withValues(alpha: 0.2)),
-                const SizedBox(height: AppSpacing.md),
-                Text(
-                  'Tutor directory is currently refreshing.',
-                  style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                TextButton.icon(
-                  onPressed: () => context.push('/find-tutors'),
-                  icon: const Icon(Icons.search),
-                  label: const Text('Browse Directory'),
-                ),
-              ],
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Tutor Directory', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+              TextButton(
+                onPressed: () => context.push('/find-tutors'),
+                child: const Text('View All'),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            'Browse our directory of qualified tutors available for home and online tuition.',
+            style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface.withValues(alpha: 0.7)),
           ),
         ],
       ),

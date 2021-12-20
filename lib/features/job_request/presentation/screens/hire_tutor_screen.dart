@@ -6,6 +6,7 @@ import '../../../../shared/widgets/app_button.dart';
 import '../../../../shared/widgets/app_dropdown.dart';
 import '../../../../shared/widgets/app_text_field.dart';
 import '../../../../shared/widgets/dynamic_location_selector.dart';
+import '../../../../shared/widgets/dynamic_subject_selector.dart';
 import '../../domain/models/job_request_model.dart';
 import '../../data/repositories/firebase_job_repository_impl.dart';
 
@@ -24,16 +25,7 @@ class _HireTutorScreenState extends State<HireTutorScreen> {
   LocationSelection _location = const LocationSelection(province: '', district: '', area: '');
   String? _selectedGrade;
   
-  final List<String> _selectedSubjects = [];
-
-  final List<String> _availableSubjects = [
-    'Social',
-    'Nepali',
-    'English',
-    'Math',
-    'Science',
-    'Health',
-  ];
+  List<String> _selectedSubjects = [];
 
   bool _isLoading = false;
 
@@ -137,25 +129,14 @@ class _HireTutorScreenState extends State<HireTutorScreen> {
                 // 4. Subjects (Chips)
                 Text('Subjects Required', style: theme.textTheme.labelLarge),
                 const SizedBox(height: AppSpacing.sm),
-                Wrap(
-                  spacing: 8.0,
-                  runSpacing: 4.0,
-                  children: _availableSubjects.map((subject) {
-                    final isSelected = _selectedSubjects.contains(subject);
-                    return FilterChip(
-                      label: Text(subject),
-                      selected: isSelected,
-                      onSelected: (selected) {
-                        setState(() {
-                          if (selected) {
-                            _selectedSubjects.add(subject);
-                          } else {
-                            _selectedSubjects.remove(subject);
-                          }
-                        });
-                      },
-                    );
-                  }).toList(),
+                DynamicSubjectSelector(
+                  selectedSubjects: _selectedSubjects,
+                  multiSelect: true,
+                  onChanged: (subjects) {
+                    setState(() {
+                      _selectedSubjects = subjects;
+                    });
+                  },
                 ),
 
                 const SizedBox(height: AppSpacing.lg),

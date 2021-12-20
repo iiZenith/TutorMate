@@ -6,11 +6,14 @@ import '../features/auth/presentation/screens/auth_error_screen.dart';
 import '../features/auth/presentation/screens/landing_screen.dart';
 import '../features/auth/presentation/screens/quick_entry_screen.dart';
 import '../features/auth/presentation/screens/detailed_registration_screen.dart';
+import '../features/auth/presentation/screens/email_verification_screen.dart';
 import '../features/auth/presentation/providers/auth_provider.dart';
 import '../features/onboarding/presentation/screens/student_onboarding_screen.dart';
 import '../features/onboarding/presentation/screens/tutor_onboarding_screen.dart';
 import '../features/job_request/presentation/screens/hire_tutor_screen.dart';
 import '../features/job_request/presentation/screens/my_requests_screen.dart';
+import '../features/job_request/presentation/screens/request_details_screen.dart';
+import '../features/job_request/domain/models/job_request_model.dart';
 import '../features/tutor_directory/presentation/screens/find_tutors_screen.dart';
 import '../features/student_dashboard/presentation/screens/student_main_layout.dart';
 import '../features/student_dashboard/presentation/screens/student_profile_screen.dart';
@@ -42,6 +45,11 @@ GoRouter createAppRouter(AuthProvider authProvider) {
         return null;
       }
 
+      if (authState == AuthState.needsVerification) {
+        if (state.matchedLocation != '/verify-email') return '/verify-email';
+        return null;
+      }
+
       if (authState == AuthState.needsOnboarding) {
         final role = authProvider.user?.role;
         if (role == UserRole.studentGuardian && state.matchedLocation != '/onboarding/student') return '/onboarding/student';
@@ -58,7 +66,8 @@ GoRouter createAppRouter(AuthProvider authProvider) {
               loc != '/find-tutors' && 
               loc != '/hire-tutor' && 
               loc != '/student/profile' && 
-              loc != '/my-requests') {
+              loc != '/my-requests' &&
+              loc != '/request-details') {
             return '/dashboard/student';
           }
         } else if (role == UserRole.tutor) {
@@ -78,6 +87,10 @@ GoRouter createAppRouter(AuthProvider authProvider) {
       GoRoute(
         path: '/auth-error',
         builder: (context, state) => const AuthErrorScreen(),
+      ),
+      GoRoute(
+        path: '/verify-email',
+        builder: (context, state) => const EmailVerificationScreen(),
       ),
       GoRoute(
         path: '/landing',
@@ -130,6 +143,13 @@ GoRouter createAppRouter(AuthProvider authProvider) {
         builder: (context, state) => const StudentMainLayout(
           child: MyRequestsScreen(),
         ),
+      ),
+      GoRoute(
+        path: '/request-details',
+        builder: (context, state) {
+          final job = state.extra as JobRequestModel;
+          return RequestDetailsScreen(job: job);
+        },
       ),
       GoRoute(
         path: '/hire-tutor',

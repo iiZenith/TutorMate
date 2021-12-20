@@ -33,6 +33,7 @@ class _DynamicLocationSelectorState extends State<DynamicLocationSelector> {
   final LocationService _locationService = LocationService();
   List<ProvinceDoc> _provinces = [];
   bool _isLoading = true;
+  String? _error;
 
   String? _selectedProvince;
   String? _selectedDistrict;
@@ -48,12 +49,21 @@ class _DynamicLocationSelectorState extends State<DynamicLocationSelector> {
   }
 
   Future<void> _loadLocations() async {
-    final data = await _locationService.getLocationsTree();
-    if (mounted) {
-      setState(() {
-        _provinces = data;
-        _isLoading = false;
-      });
+    try {
+      final data = await _locationService.getLocationsTree();
+      if (mounted) {
+        setState(() {
+          _provinces = data;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _error = e.toString();
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -71,6 +81,26 @@ class _DynamicLocationSelectorState extends State<DynamicLocationSelector> {
       return const Padding(
         padding: EdgeInsets.symmetric(vertical: 16.0),
         child: Center(child: CircularProgressIndicator()),
+      );
+    }
+    
+    if (_error != null) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16.0),
+        child: Center(
+          child: Text(
+            'Failed to load locations: $_error', 
+            style: TextStyle(color: Theme.of(context).colorScheme.error),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    }
+    
+    if (_provinces.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 16.0),
+        child: Center(child: Text('No locations available in database.')),
       );
     }
 

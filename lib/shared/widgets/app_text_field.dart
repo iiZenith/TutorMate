@@ -7,6 +7,7 @@ class AppTextField extends StatefulWidget {
   final bool isPassword;
   final TextInputType keyboardType;
   final String? Function(String?)? validator;
+  final bool readOnly;
 
   const AppTextField({
     super.key,
@@ -16,6 +17,7 @@ class AppTextField extends StatefulWidget {
     this.isPassword = false,
     this.keyboardType = TextInputType.text,
     this.validator,
+    this.readOnly = false,
   });
 
   @override
@@ -46,6 +48,7 @@ class _AppTextFieldState extends State<AppTextField> {
           obscureText: _obscureText,
           keyboardType: widget.keyboardType,
           validator: widget.validator,
+          readOnly: widget.readOnly,
           decoration: InputDecoration(
             hintText: widget.hint,
             suffixIcon: widget.isPassword

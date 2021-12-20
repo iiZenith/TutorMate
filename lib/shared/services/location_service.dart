@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/location_models.dart';
-import '../../core/constants/nepal_locations.dart';
 
 class LocationService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -14,18 +13,9 @@ class LocationService {
         provinces.sort((a, b) => a.name.compareTo(b.name));
         return provinces;
       }
+      return []; // Return empty list if empty, NO static fallback
     } catch (e) {
-      // Fallback to local
+      throw Exception('Failed to load locations: $e');
     }
-
-    // Fallback if empty or error
-    return nepalProvinces.map((p) {
-      final districtsMap = <String, List<String>>{};
-      for (var d in p.districts) {
-        final sortedAreas = d.areas.map((a) => a.name).toList()..sort();
-        districtsMap[d.name] = sortedAreas;
-      }
-      return ProvinceDoc(name: p.name, districts: districtsMap);
-    }).toList();
   }
 }

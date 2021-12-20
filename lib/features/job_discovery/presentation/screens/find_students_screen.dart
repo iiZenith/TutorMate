@@ -3,9 +3,11 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_radii.dart';
 import '../../../../shared/widgets/app_button.dart';
 import '../../../../shared/widgets/dynamic_location_selector.dart';
+import '../../../../shared/widgets/dynamic_subject_selector.dart';
 import '../../../../shared/widgets/app_text_field.dart';
 import '../../../job_request/domain/models/job_request_model.dart';
 import '../../../job_request/data/repositories/firebase_job_repository_impl.dart';
+import '../../../../app/app.dart';
 
 class FindStudentsScreen extends StatefulWidget {
   const FindStudentsScreen({super.key});
@@ -20,15 +22,6 @@ class _FindStudentsScreenState extends State<FindStudentsScreen> {
   LocationSelection _location = const LocationSelection(province: '', district: '', area: '');
   String? _selectedSubject;
   int? _minBudget;
-
-  final List<String> _availableSubjects = [
-    'Social',
-    'Nepali',
-    'English',
-    'Math',
-    'Science',
-    'Health',
-  ];
 
   void _showFilterBottomSheet(BuildContext context) {
     LocationSelection tempLocation = _location;
@@ -82,21 +75,14 @@ class _FindStudentsScreenState extends State<FindStudentsScreen> {
                     
                     Text('Subject Category', style: theme.textTheme.labelLarge),
                     const SizedBox(height: AppSpacing.sm),
-                    Wrap(
-                      spacing: 8.0,
-                      runSpacing: 4.0,
-                      children: _availableSubjects.map((subject) {
-                        final isSelected = tempSubject == subject;
-                        return ChoiceChip(
-                          label: Text(subject),
-                          selected: isSelected,
-                          onSelected: (selected) {
-                            setStateSB(() {
-                              tempSubject = selected ? subject : null;
-                            });
-                          },
-                        );
-                      }).toList(),
+                    DynamicSubjectSelector(
+                      selectedSubjects: tempSubject != null ? [tempSubject!] : [],
+                      multiSelect: false,
+                      onChanged: (subjects) {
+                        setStateSB(() {
+                          tempSubject = subjects.isNotEmpty ? subjects.first : null;
+                        });
+                      },
                     ),
                     const SizedBox(height: AppSpacing.lg),
 
@@ -212,10 +198,46 @@ class _FindStudentsScreenState extends State<FindStudentsScreen> {
   }
 }
 
-class _StudentRequestCard extends StatelessWidget {
+class _StudentRequestCard extends StatefulWidget {
   final JobRequestModel job;
 
   const _StudentRequestCard({required this.job});
+
+  @override
+  State<_StudentRequestCard> createState() => _StudentRequestCardState();
+}
+
+class _StudentRequestCardState extends State<_StudentRequestCard> {
+  bool _isLoading = false;
+
+  void _expressInterest() async {
+    final user = AuthProviderInherited.of(context).user;
+    if (user == null) return;
+    
+    setState(() => _isLoading = true);
+    try {
+      await FirebaseJobRepositoryImpl().expressInterest(
+        jobId: widget.job.jobId, 
+        tutorId: user.id, 
+        tutorName: user.fullName
+      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Interest expressed successfully!')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -235,7 +257,7 @@ class _StudentRequestCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    job.subjects.isNotEmpty ? job.subjects.join(', ') : 'General Subjects',
+                    widget.job.subjects.isNotEmpty ? widget.job.subjects.join(', ') : 'General Subjects',
                     style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -246,7 +268,7 @@ class _StudentRequestCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
-                    job.grade,
+                    widget.job.grade,
                     style: theme.textTheme.labelSmall?.copyWith(
                       color: theme.colorScheme.secondary,
                       fontWeight: FontWeight.bold,
@@ -256,22 +278,18 @@ class _StudentRequestCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: AppSpacing.md),
-            _InfoRow(icon: Icons.location_on_outlined, text: '${job.district} - ${job.area}'),
+            _InfoRow(icon: Icons.location_on_outlined, text: '${widget.job.district} - ${widget.job.area}'),
             const SizedBox(height: AppSpacing.xs),
-            _InfoRow(icon: Icons.account_balance_wallet_outlined, text: 'Rs. ${job.budgetNpr} / month'),
+            _InfoRow(icon: Icons.account_balance_wallet_outlined, text: 'Rs. ${widget.job.budgetNpr} / month'),
             const SizedBox(height: AppSpacing.lg),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Interest expressed successfully!')),
-                  );
-                },
+                onPressed: _isLoading ? null : _expressInterest,
                 style: ElevatedButton.styleFrom(
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadii.large)),
                 ),
-                child: const Text('Express Interest'),
+                child: _isLoading ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2)) : const Text('Express Interest'),
               ),
             ),
           ],

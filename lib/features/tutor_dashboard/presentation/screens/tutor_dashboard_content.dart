@@ -28,22 +28,30 @@ class TutorDashboardContent extends StatelessWidget {
           const SizedBox(height: AppSpacing.md),
 
           // Subtle Verification Banner
-          if (user != null && !user.isProfileComplete)
+          if (user != null && user.verificationStatus != 'approved')
             Container(
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
               margin: const EdgeInsets.only(bottom: AppSpacing.lg),
               decoration: BoxDecoration(
-                color: AppColors.warning.withValues(alpha: 0.1),
+                color: user.verificationStatus == 'rejected' ? Colors.red.withValues(alpha: 0.1) : AppColors.warning.withValues(alpha: 0.1),
                 borderRadius: AppRadii.borderRadiusMedium,
-                border: Border.all(color: AppColors.warning.withValues(alpha: 0.3)),
+                border: Border.all(color: user.verificationStatus == 'rejected' ? Colors.red.withValues(alpha: 0.3) : AppColors.warning.withValues(alpha: 0.3)),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.info_outline, size: 20, color: AppColors.warning.withValues(alpha: 0.8)),
+                  Icon(
+                    user.verificationStatus == 'rejected' ? Icons.cancel : Icons.info_outline, 
+                    size: 20, 
+                    color: user.verificationStatus == 'rejected' ? Colors.red : AppColors.warning.withValues(alpha: 0.8)
+                  ),
                   const SizedBox(width: AppSpacing.sm),
                   Expanded(
                     child: Text(
-                      'Your profile verification is pending. Some features may be limited.',
+                      user.verificationStatus == 'rejected' 
+                        ? 'Your profile verification was rejected. Please update your documents.'
+                        : user.verificationStatus == 'pending' 
+                          ? 'Your profile verification is pending.'
+                          : 'Your profile verification is not submitted. Some features may be limited.',
                       style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurface),
                     ),
                   ),
