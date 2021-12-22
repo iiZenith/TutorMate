@@ -32,6 +32,28 @@ class AppUser {
   final String? citizenshipUrl;
   final String? transcriptUrl;
 
+  bool get isValidStudentProfile {
+    return studentType != null &&
+        studentType!.isNotEmpty &&
+        studentGradeLevel != null &&
+        studentGradeLevel!.isNotEmpty &&
+        subjects.isNotEmpty &&
+        district != null &&
+        district!.isNotEmpty &&
+        area != null &&
+        area!.isNotEmpty;
+  }
+
+  bool get isValidTutorProfile {
+    return headline != null &&
+        headline!.isNotEmpty &&
+        bio != null &&
+        bio!.isNotEmpty &&
+        teachingLevels.isNotEmpty &&
+        expectedMonthlyRate != null &&
+        expectedMonthlyRate! > 0;
+  }
+
   const AppUser({
     required this.id,
     required this.email,

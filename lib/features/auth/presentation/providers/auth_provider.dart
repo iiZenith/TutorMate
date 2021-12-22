@@ -245,12 +245,32 @@ class AuthProvider extends ChangeNotifier {
     if (_user == null) return;
     _setLoading();
     try {
+      // Re-fetch user to get latest state from backend
+      await _repository.reloadAuthUser();
+      _user = _repository.currentUser;
+
+      if (_user == null) throw Exception('User not found');
+
+      bool isValid = false;
+      if (_user!.role == UserRole.studentGuardian) {
+        isValid = _user!.isValidStudentProfile;
+      } else if (_user!.role == UserRole.tutor) {
+        isValid = _user!.isValidTutorProfile;
+      }
+
+      if (!isValid) {
+        throw Exception('Profile is incomplete. Please fill all required fields.');
+      }
+
       await _repository.updateProfileCompletionStatus(
         userId: _user!.id,
         isComplete: true,
       );
+      _user = _repository.currentUser;
+      _state = AuthState.authenticated;
+      notifyListeners();
     } catch (e) {
-      _setError(e.toString());
+      _setError(e.toString().replaceAll('Exception: ', ''));
     }
   }
 }

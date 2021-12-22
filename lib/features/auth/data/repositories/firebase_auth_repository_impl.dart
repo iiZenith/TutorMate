@@ -239,7 +239,6 @@ class FirebaseAuthRepositoryImpl implements AuthRepository {
         'subjects': subjects,
         'district': district,
         'area': area,
-        'isProfileComplete': true,
       });
       _cachedUser = await _fetchAppUser(userId);
     } catch (e) {
