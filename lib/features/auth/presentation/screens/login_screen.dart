@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../domain/models/user_role.dart';
 import '../../../../shared/widgets/auth_floating_card_layout.dart';
 import '../../../../shared/widgets/app_button.dart';
 import '../../../../shared/widgets/app_text_field.dart';
@@ -27,6 +28,7 @@ class _LoginScreenState extends State<LoginScreen> {
       await authProvider.signIn(
         _emailController.text.trim(),
         _passwordController.text,
+        expectedRole: UserRole.fromString(widget.role),
       );
 
       if (!mounted) return;

@@ -83,13 +83,19 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> signIn(String email, String password) async {
+  Future<void> signIn(String email, String password, {UserRole? expectedRole}) async {
     _setLoading();
     try {
-      await _repository.signInWithEmailAndPassword(
+      final loggedInUser = await _repository.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
+
+      if (expectedRole != null && loggedInUser.role != expectedRole) {
+        await _repository.signOut();
+        _setError('The selected account type does not match this account.');
+        return;
+      }
       // The stream listener will handle the state update
     } catch (e) {
       _setError(e.toString());
