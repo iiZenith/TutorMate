@@ -12,14 +12,48 @@ class StudentOnboardingScreen extends StatefulWidget {
 }
 
 class _StudentOnboardingScreenState extends State<StudentOnboardingScreen> {
+  final _formKey = GlobalKey<FormState>();
   String _userType = 'student';
   final _gradeController = TextEditingController();
   final _subjectsController = TextEditingController();
   final _locationController = TextEditingController();
   
   void _saveProfile() async {
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+    
     final authProvider = AuthProviderInherited.of(context);
-    await authProvider.completeOnboarding();
+    
+    final locText = _locationController.text.trim();
+    String district = locText;
+    String area = locText;
+    if (locText.contains(',')) {
+      final parts = locText.split(',');
+      district = parts[0].trim();
+      area = parts.length > 1 ? parts[1].trim() : district;
+    }
+
+    final subjects = _subjectsController.text
+        .split(',')
+        .map((s) => s.trim())
+        .where((s) => s.isNotEmpty)
+        .toList();
+        
+    if (subjects.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter at least one subject.')));
+      return;
+    }
+
+    await authProvider.updateStudentProfile(
+      studentType: _userType,
+      studentGradeLevel: _gradeController.text.trim(),
+      subjects: subjects,
+      district: district,
+      area: area,
+    );
+
+    if (mounted && authProvider.errorMessage == null) {
+      await authProvider.completeOnboarding();
+    }
   }
 
   @override
@@ -32,9 +66,11 @@ class _StudentOnboardingScreenState extends State<StudentOnboardingScreen> {
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(AppSpacing.lg),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
               Text(
                 'We\'ll help match you with the best tutors in your area',
                 style: theme.textTheme.bodyLarge?.copyWith(
@@ -61,6 +97,7 @@ class _StudentOnboardingScreenState extends State<StudentOnboardingScreen> {
                 label: 'Grade / Level',
                 hint: 'e.g., Grade 10, +2 Science, Bachelor',
                 controller: _gradeController,
+                validator: (v) => v == null || v.isEmpty ? 'Required' : null,
               ),
               const SizedBox(height: AppSpacing.md),
               
@@ -68,6 +105,7 @@ class _StudentOnboardingScreenState extends State<StudentOnboardingScreen> {
                 label: 'Subjects Needed',
                 hint: 'e.g., Math, Science, English',
                 controller: _subjectsController,
+                validator: (v) => v == null || v.isEmpty ? 'Required' : null,
               ),
               const SizedBox(height: AppSpacing.md),
 
@@ -75,6 +113,7 @@ class _StudentOnboardingScreenState extends State<StudentOnboardingScreen> {
                 label: 'Location (City / Area)',
                 hint: 'e.g., Kathmandu, Baneshwor',
                 controller: _locationController,
+                validator: (v) => v == null || v.isEmpty ? 'Required' : null,
               ),
               const SizedBox(height: AppSpacing.xl),
 
