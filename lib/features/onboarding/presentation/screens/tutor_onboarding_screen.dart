@@ -12,6 +12,7 @@ class TutorOnboardingScreen extends StatefulWidget {
 }
 
 class _TutorOnboardingScreenState extends State<TutorOnboardingScreen> {
+  final _formKey = GlobalKey<FormState>();
   final _headlineController = TextEditingController();
   final _bioController = TextEditingController();
   final _rateController = TextEditingController();
@@ -19,8 +20,30 @@ class _TutorOnboardingScreenState extends State<TutorOnboardingScreen> {
   final Set<String> _selectedLevels = {};
   
   void _saveProfile() async {
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+    if (_selectedLevels.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please select at least one teaching level')));
+      return;
+    }
+
     final authProvider = AuthProviderInherited.of(context);
-    await authProvider.completeOnboarding();
+    
+    final int? rate = int.tryParse(_rateController.text.trim());
+    if (rate == null || rate <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter a valid monthly rate')));
+      return;
+    }
+
+    await authProvider.updateTutorProfile(
+      headline: _headlineController.text.trim(),
+      bio: _bioController.text.trim(),
+      teachingLevels: _selectedLevels.toList(),
+      expectedMonthlyRate: rate,
+    );
+
+    if (mounted && authProvider.errorMessage == null) {
+      await authProvider.completeOnboarding();
+    }
   }
 
   @override
@@ -33,9 +56,11 @@ class _TutorOnboardingScreenState extends State<TutorOnboardingScreen> {
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(AppSpacing.lg),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
               Text(
                 'Help students and parents understand your teaching expertise',
                 style: theme.textTheme.bodyLarge?.copyWith(
@@ -50,12 +75,14 @@ class _TutorOnboardingScreenState extends State<TutorOnboardingScreen> {
                 label: 'Headline',
                 hint: 'e.g., M.Sc. Physics Tutor with 5+ Years Exp',
                 controller: _headlineController,
+                validator: (v) => v == null || v.isEmpty ? 'Required' : null,
               ),
               const SizedBox(height: AppSpacing.sm),
               AppTextField(
                 label: 'Bio',
                 hint: 'Tell students about your teaching style',
                 controller: _bioController,
+                validator: (v) => v == null || v.isEmpty ? 'Required' : null,
               ),
               
               const SizedBox(height: AppSpacing.xl),
@@ -88,6 +115,7 @@ class _TutorOnboardingScreenState extends State<TutorOnboardingScreen> {
                 hint: 'e.g., 10000',
                 keyboardType: TextInputType.number,
                 controller: _rateController,
+                validator: (v) => v == null || v.isEmpty ? 'Required' : null,
               ),
 
               const SizedBox(height: AppSpacing.xxl),
