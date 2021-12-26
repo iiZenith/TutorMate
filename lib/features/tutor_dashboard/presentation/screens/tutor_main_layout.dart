@@ -40,7 +40,12 @@ class _TutorMainLayoutState extends State<TutorMainLayout> {
                 children: [
                   Text(user?.fullName.isNotEmpty == true ? user!.fullName : 'Tutor'),
                   const SizedBox(width: 8),
-                  Icon(Icons.verified_user, size: 16, color: theme.colorScheme.onPrimary),
+                  if (user?.verificationStatus == 'approved')
+                    Icon(Icons.verified_user, size: 16, color: theme.colorScheme.onPrimary)
+                  else if (user?.verificationStatus == 'pending')
+                    Icon(Icons.hourglass_empty, size: 16, color: Colors.orange)
+                  else if (user?.verificationStatus == 'rejected')
+                    Icon(Icons.cancel, size: 16, color: Colors.red),
                 ],
               ),
               accountEmail: Text(user?.email.isNotEmpty == true ? user!.email : 'Not Provided'),
