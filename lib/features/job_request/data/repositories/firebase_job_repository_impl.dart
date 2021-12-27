@@ -68,18 +68,14 @@ class FirebaseJobRepositoryImpl implements JobRepository {
     required String tutorId,
     required String tutorName,
   }) async {
-    // Check for duplicate
-    final existing = await _firestore
-        .collection('tutor_interests')
-        .where('jobId', isEqualTo: jobId)
-        .where('tutorId', isEqualTo: tutorId)
-        .get();
+    final docId = '${jobId}_$tutorId';
+    final docRef = _firestore.collection('tutor_interests').doc(docId);
     
-    if (existing.docs.isNotEmpty) {
+    final docSnapshot = await docRef.get();
+    if (docSnapshot.exists) {
       throw Exception('You have already expressed interest in this tuition.');
     }
 
-    final docRef = _firestore.collection('tutor_interests').doc();
     final interest = TutorInterestModel(
       id: docRef.id,
       jobId: jobId,
