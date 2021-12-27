@@ -29,7 +29,7 @@ class FirebaseTutorRepositoryImpl implements TutorRepository {
         // Tutors usually ask for a minimum expected salary. 
         // We filter out tutors who demand strictly MORE than the student's max budget.
         // We only include tutors whose expected salary is <= maxSalary.
-        tutors = tutors.where((t) => t.expectedSalary > 0 && t.expectedSalary <= maxSalary).toList();
+        tutors = tutors.where((t) => t.expectedMonthlyRate > 0 && t.expectedMonthlyRate <= maxSalary).toList();
       }
 
       return tutors;
