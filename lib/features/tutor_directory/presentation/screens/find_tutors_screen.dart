@@ -275,7 +275,7 @@ class _TutorProfileCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Expected: Rs. ${tutor.expectedSalary > 0 ? tutor.expectedSalary : '-'}',
+                  'Expected Monthly Rate: Rs. ${tutor.expectedMonthlyRate > 0 ? tutor.expectedMonthlyRate : '-'}',
                   style: theme.textTheme.titleMedium?.copyWith(
                     color: theme.colorScheme.primary,
                     fontWeight: FontWeight.w600,
