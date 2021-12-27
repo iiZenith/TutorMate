@@ -3,14 +3,14 @@ class TutorModel {
   final String fullName;
   final String district;
   final List<String> subjects;
-  final int expectedSalary;
+  final int expectedMonthlyRate;
 
   const TutorModel({
     required this.id,
     required this.fullName,
     required this.district,
     required this.subjects,
-    required this.expectedSalary,
+    required this.expectedMonthlyRate,
   });
 
   factory TutorModel.fromMap(Map<String, dynamic> map, String id) {
@@ -19,7 +19,7 @@ class TutorModel {
       fullName: map['fullName'] as String? ?? 'Unknown Tutor',
       district: map['district'] as String? ?? 'Not specified',
       subjects: List<String>.from(map['subjects'] ?? []),
-      expectedSalary: (map['expectedSalary'] as num?)?.toInt() ?? 0,
+      expectedMonthlyRate: (map['expectedMonthlyRate'] as num?)?.toInt() ?? 0,
     );
   }
 }
