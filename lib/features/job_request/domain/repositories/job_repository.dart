@@ -22,6 +22,14 @@ abstract class JobRepository {
 
   Stream<List<TutorInterestModel>> getMyInterestsStream(String tutorId);
 
-  Future<void> acceptInterest(String jobId, String interestId);
-  Future<void> rejectInterest(String interestId);
+  Future<void> acceptInterest({
+    required String jobId, 
+    required String interestId, 
+    required String studentId,
+  });
+  
+  Future<void> rejectInterest({
+    required String interestId,
+    required String studentId,
+  });
 }

@@ -115,7 +115,25 @@ class FirebaseJobRepositoryImpl implements JobRepository {
   }
 
   @override
-  Future<void> acceptInterest(String jobId, String interestId) async {
+  Future<void> acceptInterest({
+    required String jobId, 
+    required String interestId, 
+    required String studentId,
+  }) async {
+    final jobDoc = await _firestore.collection('job_requests').doc(jobId).get();
+    if (!jobDoc.exists || jobDoc.data()?['studentId'] != studentId) {
+      throw Exception('Unauthorized or job not found.');
+    }
+
+    final interestDoc = await _firestore.collection('tutor_interests').doc(interestId).get();
+    if (!interestDoc.exists || interestDoc.data()?['jobId'] != jobId) {
+      throw Exception('Interest does not belong to this job.');
+    }
+    
+    if (interestDoc.data()?['status'] != 'submitted') {
+      throw Exception('Interest is not in submitted state.');
+    }
+
     final batch = _firestore.batch();
     
     // Update interest status to accepted
@@ -130,7 +148,25 @@ class FirebaseJobRepositoryImpl implements JobRepository {
   }
 
   @override
-  Future<void> rejectInterest(String interestId) async {
+  Future<void> rejectInterest({
+    required String interestId,
+    required String studentId,
+  }) async {
+    final interestDoc = await _firestore.collection('tutor_interests').doc(interestId).get();
+    if (!interestDoc.exists) {
+      throw Exception('Interest not found.');
+    }
+
+    final jobId = interestDoc.data()?['jobId'];
+    if (jobId == null) {
+      throw Exception('Interest has no associated job.');
+    }
+
+    final jobDoc = await _firestore.collection('job_requests').doc(jobId).get();
+    if (!jobDoc.exists || jobDoc.data()?['studentId'] != studentId) {
+      throw Exception('Unauthorized or job not found.');
+    }
+
     await _firestore.collection('tutor_interests').doc(interestId).update({
       'status': 'rejected',
     });
