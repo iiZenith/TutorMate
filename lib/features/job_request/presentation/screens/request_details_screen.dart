@@ -4,7 +4,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_radii.dart';
 import '../../domain/models/job_request_model.dart';
 import '../../domain/models/tutor_interest_model.dart';
-import '../../data/repositories/firebase_job_repository_impl.dart';
+import '../../../../app/app.dart';
 
 class RequestDetailsScreen extends StatefulWidget {
   final JobRequestModel job;
@@ -19,8 +19,14 @@ class _RequestDetailsScreenState extends State<RequestDetailsScreen> {
   final _repository = FirebaseJobRepositoryImpl();
 
   void _acceptInterest(String interestId) async {
+    final user = AuthProviderInherited.of(context).user;
+    if (user == null) return;
     try {
-      await _repository.acceptInterest(widget.job.jobId, interestId);
+      await _repository.acceptInterest(
+        jobId: widget.job.jobId, 
+        interestId: interestId, 
+        studentId: user.id
+      );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Tutor accepted!')));
         context.pop(); // Go back after accepting
@@ -33,8 +39,13 @@ class _RequestDetailsScreenState extends State<RequestDetailsScreen> {
   }
 
   void _rejectInterest(String interestId) async {
+    final user = AuthProviderInherited.of(context).user;
+    if (user == null) return;
     try {
-      await _repository.rejectInterest(interestId);
+      await _repository.rejectInterest(
+        interestId: interestId, 
+        studentId: user.id
+      );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Tutor rejected.')));
       }
