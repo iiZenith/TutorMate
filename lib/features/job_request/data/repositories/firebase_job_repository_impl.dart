@@ -28,20 +28,17 @@ class FirebaseJobRepositoryImpl implements JobRepository {
     if (district != null && district.isNotEmpty) {
       query = query.where('district', isEqualTo: district);
     }
+    if (subject != null && subject.isNotEmpty) {
+      query = query.where('subjects', arrayContains: subject);
+    }
+    if (minBudget != null && minBudget > 0) {
+      query = query.where('budgetNpr', isGreaterThanOrEqualTo: minBudget);
+    }
 
-    // We execute local filtering for arrays and inequalities to prevent forcing manual composite indexes during MVP
     return query.snapshots().map((snapshot) {
       var jobs = snapshot.docs.map((doc) {
         return JobRequestModel.fromMap(doc.data() as Map<String, dynamic>, doc.id);
       }).toList();
-
-      if (subject != null && subject.isNotEmpty) {
-        jobs = jobs.where((job) => job.subjects.contains(subject)).toList();
-      }
-      if (minBudget != null && minBudget > 0) {
-        jobs = jobs.where((job) => job.budgetNpr >= minBudget).toList();
-      }
-
       jobs.sort((a, b) => b.createdAt.compareTo(a.createdAt));
       return jobs;
     });
