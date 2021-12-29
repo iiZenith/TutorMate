@@ -16,22 +16,17 @@ class FirebaseTutorRepositoryImpl implements TutorRepository {
     if (district != null && district.isNotEmpty) {
       query = query.where('district', isEqualTo: district);
     }
+    if (subject != null && subject.isNotEmpty) {
+      query = query.where('subjects', arrayContains: subject);
+    }
+    if (maxSalary != null && maxSalary > 0) {
+      query = query.where('expectedMonthlyRate', isLessThanOrEqualTo: maxSalary);
+    }
 
     return query.snapshots().map((snapshot) {
       var tutors = snapshot.docs.map((doc) {
         return TutorModel.fromMap(doc.data() as Map<String, dynamic>, doc.id);
       }).toList();
-
-      if (subject != null && subject.isNotEmpty) {
-        tutors = tutors.where((t) => t.subjects.contains(subject)).toList();
-      }
-      if (maxSalary != null && maxSalary > 0) {
-        // Tutors usually ask for a minimum expected salary. 
-        // We filter out tutors who demand strictly MORE than the student's max budget.
-        // We only include tutors whose expected salary is <= maxSalary.
-        tutors = tutors.where((t) => t.expectedMonthlyRate > 0 && t.expectedMonthlyRate <= maxSalary).toList();
-      }
-
       return tutors;
     });
   }
