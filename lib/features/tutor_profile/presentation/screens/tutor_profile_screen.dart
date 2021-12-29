@@ -68,7 +68,7 @@ class _PersonalTabState extends State<_PersonalTab> {
     _phoneController = TextEditingController(text: widget.user?.phoneNumber);
     if (widget.user != null) {
       _location = LocationSelection(
-        province: '', // Not strictly tracked in model right now, only district and area
+        province: widget.user!.province ?? '',
         district: widget.user!.district ?? '',
         area: widget.user!.area ?? '',
       );
@@ -87,6 +87,7 @@ class _PersonalTabState extends State<_PersonalTab> {
     await authProvider.updateTutorProfile(
       fullName: _nameController.text.trim(),
       phoneNumber: _phoneController.text.trim(),
+      province: _location.province,
       district: _location.district,
       area: _location.area,
     );

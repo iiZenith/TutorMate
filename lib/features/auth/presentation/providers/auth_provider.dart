@@ -171,6 +171,7 @@ class AuthProvider extends ChangeNotifier {
     required String studentType,
     required String studentGradeLevel,
     required List<String> subjects,
+    String? province,
     required String district,
     required String area,
   }) async {
@@ -182,6 +183,7 @@ class AuthProvider extends ChangeNotifier {
         studentType: studentType,
         studentGradeLevel: studentGradeLevel,
         subjects: subjects,
+        province: province,
         district: district,
         area: area,
       );
@@ -198,6 +200,7 @@ class AuthProvider extends ChangeNotifier {
   Future<void> updateTutorProfile({
     String? fullName,
     String? phoneNumber,
+    String? province,
     String? district,
     String? area,
     String? headline,
@@ -221,6 +224,7 @@ class AuthProvider extends ChangeNotifier {
         userId: _user!.id,
         fullName: fullName,
         phoneNumber: phoneNumber,
+        province: province,
         district: district,
         area: area,
         headline: headline,

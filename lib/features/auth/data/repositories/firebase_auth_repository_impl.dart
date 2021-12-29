@@ -55,6 +55,7 @@ class FirebaseAuthRepositoryImpl implements AuthRepository {
       fullName: data['fullName'] ?? '',
       phoneNumber: data['phoneNumber'] as String?,
       gender: data['gender'] as String?,
+      province: data['province'] as String?,
       district: data['district'] as String?,
       area: data['area'] as String?,
       role: parsedRole,
@@ -109,6 +110,7 @@ class FirebaseAuthRepositoryImpl implements AuthRepository {
     required UserRole role,
     String? phoneNumber,
     String? gender,
+    String? province,
     String? district,
     String? area,
   }) async {
@@ -131,6 +133,7 @@ class FirebaseAuthRepositoryImpl implements AuthRepository {
         fullName: fullName,
         phoneNumber: phoneNumber,
         gender: gender,
+        province: province,
         district: district,
         area: area,
         role: role,
@@ -145,6 +148,7 @@ class FirebaseAuthRepositoryImpl implements AuthRepository {
         'fullName': fullName,
         'phoneNumber': phoneNumber,
         'gender': gender,
+        'province': province,
         'district': district,
         'area': area,
         'role': role.name,
@@ -229,17 +233,22 @@ class FirebaseAuthRepositoryImpl implements AuthRepository {
     required String studentType,
     required String studentGradeLevel,
     required List<String> subjects,
+    String? province,
     required String district,
     required String area,
   }) async {
     try {
-      await _firestore.collection('users').doc(userId).update({
+      final updates = <String, dynamic>{
         'studentType': studentType,
         'studentGradeLevel': studentGradeLevel,
         'subjects': subjects,
         'district': district,
         'area': area,
-      });
+      };
+      if (province != null && province.isNotEmpty) {
+        updates['province'] = province;
+      }
+      await _firestore.collection('users').doc(userId).update(updates);
       _cachedUser = await _fetchAppUser(userId);
     } catch (e) {
       throw AuthException('Failed to update student profile: $e');
@@ -252,6 +261,7 @@ class FirebaseAuthRepositoryImpl implements AuthRepository {
     String? fullName,
     String? email,
     String? phoneNumber,
+    String? province,
     String? district,
     String? area,
     String? headline,
@@ -272,6 +282,7 @@ class FirebaseAuthRepositoryImpl implements AuthRepository {
       final updates = <String, dynamic>{};
       if (fullName != null) updates['fullName'] = fullName;
       if (phoneNumber != null) updates['phoneNumber'] = phoneNumber;
+      if (province != null) updates['province'] = province;
       if (district != null) updates['district'] = district;
       if (area != null) updates['area'] = area;
       if (headline != null) updates['headline'] = headline;

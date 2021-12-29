@@ -5,6 +5,7 @@ class AppUser {
   final String email;
   final String? phoneNumber;
   final String? gender;
+  final String? province;
   final String? district;
   final String? area;
   final String fullName;
@@ -59,6 +60,7 @@ class AppUser {
     required this.email,
     this.phoneNumber,
     this.gender,
+    this.province,
     this.district,
     this.area,
     required this.fullName,
@@ -88,6 +90,7 @@ class AppUser {
     String? email,
     String? phoneNumber,
     String? gender,
+    String? province,
     String? district,
     String? area,
     String? fullName,
@@ -116,6 +119,7 @@ class AppUser {
       email: email ?? this.email,
       phoneNumber: phoneNumber ?? this.phoneNumber,
       gender: gender ?? this.gender,
+      province: province ?? this.province,
       district: district ?? this.district,
       area: area ?? this.area,
       fullName: fullName ?? this.fullName,

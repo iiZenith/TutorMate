@@ -18,6 +18,7 @@ abstract class AuthRepository {
     required UserRole role,
     String? phoneNumber,
     String? gender,
+    String? province,
     String? district,
     String? area,
   });
@@ -40,6 +41,7 @@ abstract class AuthRepository {
     required String studentType,
     required String studentGradeLevel,
     required List<String> subjects,
+    required String province,
     required String district,
     required String area,
   });
@@ -49,6 +51,7 @@ abstract class AuthRepository {
     String? fullName,
     String? email,
     String? phoneNumber,
+    String? province,
     String? district,
     String? area,
     String? headline,

@@ -1,29 +1,3 @@
-class SeedArea {
-  final String name;
-
-  const SeedArea({required this.name});
-}
-
-class SeedDistrict {
-  final String name;
-  final List<SeedArea> areas;
-
-  const SeedDistrict({
-    required this.name,
-    required this.areas,
-  });
-}
-
-class SeedProvince {
-  final String name;
-  final List<SeedDistrict> districts;
-
-  const SeedProvince({
-    required this.name,
-    required this.districts,
-  });
-}
-
 class ProvinceDoc {
   final String name;
   final Map<String, List<String>> districts;
