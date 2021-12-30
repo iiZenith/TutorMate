@@ -46,7 +46,7 @@ class JobRequestModel {
     required this.grade,
     required this.subjects,
     required this.budgetNpr,
-    this.status = "open",
+    this.status = 'open',
     required this.createdAt,
   });
 

@@ -2,9 +2,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../domain/models/job_request_model.dart';
 import '../../domain/models/tutor_interest_model.dart';
 import '../../domain/repositories/job_repository.dart';
+import '../../../notifications/data/repositories/firebase_notification_repository_impl.dart';
 
 class FirebaseJobRepositoryImpl implements JobRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final _notificationRepo = FirebaseNotificationRepositoryImpl();
 
   @override
   Future<void> createJobRequest(JobRequestModel job) async {

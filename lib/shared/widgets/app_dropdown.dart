@@ -26,7 +26,7 @@ class AppDropdown extends StatelessWidget {
         Text(label, style: Theme.of(context).textTheme.labelLarge),
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
-          value: items.contains(value) ? value : null,
+          initialValue: items.contains(value) ? value : null,
           hint: hint != null ? Text(hint!) : null,
           items: items
               .map((e) => DropdownMenuItem(value: e, child: Text(e)))

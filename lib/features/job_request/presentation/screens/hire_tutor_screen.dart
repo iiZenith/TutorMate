@@ -40,7 +40,7 @@ class _HireTutorScreenState extends State<HireTutorScreen> {
 
     try {
       final user = AuthProviderInherited.of(context).user;
-      if (user == null) throw Exception("User not logged in");
+      if (user == null) throw Exception('User not logged in');
 
       final newJob = JobRequestModel(
         jobId: '', // Handled dynamically in repo
