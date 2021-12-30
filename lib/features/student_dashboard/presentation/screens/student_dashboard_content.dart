@@ -125,7 +125,7 @@ class StudentDashboardContent extends StatelessWidget {
                       title: Text(job.subjects.join(', ')),
                       subtitle: Text('Status: ${job.status.toUpperCase()}'),
                       trailing: const Icon(Icons.chevron_right),
-                      onTap: () => context.push('/my-requests'),
+                      onTap: () => context.push('/request-details', extra: job),
                     ),
                   );
                 },

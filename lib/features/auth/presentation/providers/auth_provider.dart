@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import '../../domain/models/app_user.dart';
 import '../../domain/models/user_role.dart';
@@ -19,9 +20,16 @@ class AuthProvider extends ChangeNotifier {
   AuthState _state = AuthState.initial;
   AppUser? _user;
   String? _errorMessage;
+  StreamSubscription<AppUser?>? _authSubscription;
 
   AuthProvider(this._repository) {
     _init();
+  }
+
+  @override
+  void dispose() {
+    _authSubscription?.cancel();
+    super.dispose();
   }
 
   AuthState get state => _state;
@@ -29,11 +37,8 @@ class AuthProvider extends ChangeNotifier {
   String? get errorMessage => _errorMessage;
   bool get isLoading => _state == AuthState.authenticating || _state == AuthState.initial;
 
-  Future<void> _init() async {
-    // Artificial splash delay
-    await Future.delayed(const Duration(seconds: 2));
-    
-    _repository.authStateChanges.listen((appUser) {
+  void _init() {
+    _authSubscription = _repository.authStateChanges.listen((appUser) {
       _user = appUser;
       if (appUser == null) {
         _state = AuthState.unauthenticated;
@@ -54,21 +59,24 @@ class AuthProvider extends ChangeNotifier {
     
     // Set initial state
     try {
-      if (_repository.currentUser == null) {
+      final current = _repository.currentUser;
+      if (current == null) {
         _state = AuthState.unauthenticated;
       } else {
-        _user = _repository.currentUser;
-        if (!_user!.isEmailVerified) {
+        _user = current;
+        if (!current.isEmailVerified) {
           _state = AuthState.needsVerification;
+        } else if (!current.isProfileComplete) {
+          _state = AuthState.needsOnboarding;
         } else {
-          _state = _user!.isProfileComplete ? AuthState.authenticated : AuthState.needsOnboarding;
+          _state = AuthState.authenticated;
         }
       }
-    } catch (e) {
-      _state = AuthState.error;
-      _errorMessage = e.toString();
+      notifyListeners();
+    } catch (_) {
+      _state = AuthState.unauthenticated;
+      notifyListeners();
     }
-    notifyListeners();
   }
 
   void _setLoading() {
@@ -109,6 +117,7 @@ class AuthProvider extends ChangeNotifier {
     UserRole role, {
     String? phoneNumber,
     String? gender,
+    String? province,
     String? district,
     String? area,
   }) async {
@@ -121,6 +130,7 @@ class AuthProvider extends ChangeNotifier {
         role: role,
         phoneNumber: phoneNumber,
         gender: gender,
+        province: province,
         district: district,
         area: area,
       );
@@ -142,10 +152,18 @@ class AuthProvider extends ChangeNotifier {
   Future<void> reloadUser() async {
     _setLoading();
     try {
-      // In a real app we'd call _repository.reload() which calls FirebaseAuth.instance.currentUser?.reload()
-      // Let's assume _repository.reload() is implemented
       await _repository.reloadAuthUser();
-      // The stream might trigger, or we fetch currentUser
+      _user = _repository.currentUser;
+      if (_user == null) {
+        _state = AuthState.unauthenticated;
+      } else if (!_user!.isEmailVerified) {
+        _state = AuthState.needsVerification;
+      } else if (!_user!.isProfileComplete) {
+        _state = AuthState.needsOnboarding;
+      } else {
+        _state = AuthState.authenticated;
+      }
+      notifyListeners();
     } catch (e) {
       _setError(e.toString());
     }
@@ -177,6 +195,7 @@ class AuthProvider extends ChangeNotifier {
     String? province,
     String? district,
     String? area,
+    String? avatarUrl,
   }) async {
     if (_user == null) return;
     _setLoading();
@@ -192,6 +211,7 @@ class AuthProvider extends ChangeNotifier {
         province: province,
         district: district,
         area: area,
+        avatarUrl: avatarUrl,
       );
       _user = _repository.currentUser;
       if (_user?.isProfileComplete == true) {
@@ -221,6 +241,7 @@ class AuthProvider extends ChangeNotifier {
     String? verificationStatus,
     String? citizenshipUrl,
     String? transcriptUrl,
+    String? avatarUrl,
     bool? isProfileComplete,
   }) async {
     if (_user == null) return;
@@ -245,6 +266,7 @@ class AuthProvider extends ChangeNotifier {
         verificationStatus: verificationStatus,
         citizenshipUrl: citizenshipUrl,
         transcriptUrl: transcriptUrl,
+        avatarUrl: avatarUrl,
         isProfileComplete: isProfileComplete,
       );
       _user = _repository.currentUser;

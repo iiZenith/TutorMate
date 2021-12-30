@@ -4,6 +4,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_radii.dart';
 import '../../domain/models/job_request_model.dart';
 import '../../domain/models/tutor_interest_model.dart';
+import '../../data/repositories/firebase_job_repository_impl.dart';
 import '../../../../app/app.dart';
 
 class RequestDetailsScreen extends StatefulWidget {

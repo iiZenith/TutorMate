@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../app/app.dart';
 import 'tutor_dashboard_content.dart';
+import 'my_applications_screen.dart';
 import '../../../job_discovery/presentation/screens/find_students_screen.dart';
 import '../../../tutor_profile/presentation/screens/tutor_profile_screen.dart';
 
@@ -17,6 +19,7 @@ class _TutorMainLayoutState extends State<TutorMainLayout> {
   final List<String> _titles = [
     'Dashboard',
     'Find Students',
+    'My Applications',
     'My Profile',
   ];
 
@@ -29,6 +32,13 @@ class _TutorMainLayoutState extends State<TutorMainLayout> {
     return Scaffold(
       appBar: AppBar(
         title: Text(_titles[_currentIndex]),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.notifications_outlined),
+            onPressed: () => context.push('/notifications'),
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
       drawer: Drawer(
         child: ListView(
@@ -51,14 +61,19 @@ class _TutorMainLayoutState extends State<TutorMainLayout> {
               accountEmail: Text(user?.email.isNotEmpty == true ? user!.email : 'Not Provided'),
               currentAccountPicture: CircleAvatar(
                 backgroundColor: theme.colorScheme.onPrimary,
-                child: Text(
-                  (user?.fullName.isNotEmpty == true ? user!.fullName : 'T')[0].toUpperCase(),
-                  style: TextStyle(
-                    color: theme.colorScheme.primary, 
-                    fontSize: 24, 
-                    fontWeight: FontWeight.bold
-                  ),
-                ),
+                backgroundImage: user?.avatarUrl != null && user!.avatarUrl!.isNotEmpty
+                    ? NetworkImage(user.avatarUrl!)
+                    : null,
+                child: user?.avatarUrl == null || user!.avatarUrl!.isEmpty
+                    ? Text(
+                        (user?.fullName.isNotEmpty == true ? user!.fullName : 'T')[0].toUpperCase(),
+                        style: TextStyle(
+                          color: theme.colorScheme.primary, 
+                          fontSize: 24, 
+                          fontWeight: FontWeight.bold
+                        ),
+                      )
+                    : null,
               ),
               otherAccountsPictures: [
                 Tooltip(
@@ -70,6 +85,43 @@ class _TutorMainLayoutState extends State<TutorMainLayout> {
                 )
               ],
             ),
+            ListTile(
+              leading: const Icon(Icons.dashboard_outlined),
+              title: const Text('Dashboard'),
+              selected: _currentIndex == 0,
+              onTap: () {
+                Navigator.pop(context);
+                setState(() => _currentIndex = 0);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.search_outlined),
+              title: const Text('Find Students'),
+              selected: _currentIndex == 1,
+              onTap: () {
+                Navigator.pop(context);
+                setState(() => _currentIndex = 1);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.assignment_outlined),
+              title: const Text('My Applications'),
+              selected: _currentIndex == 2,
+              onTap: () {
+                Navigator.pop(context);
+                setState(() => _currentIndex = 2);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.person_outline),
+              title: const Text('My Profile'),
+              selected: _currentIndex == 3,
+              onTap: () {
+                Navigator.pop(context);
+                setState(() => _currentIndex = 3);
+              },
+            ),
+            const Divider(),
             ListTile(
               leading: const Icon(Icons.logout),
               title: const Text('Sign Out'),
@@ -92,6 +144,7 @@ class _TutorMainLayoutState extends State<TutorMainLayout> {
             },
           ),
           const FindStudentsScreen(),
+          const MyApplicationsScreen(),
           const TutorProfileScreen(),
         ],
       ),
@@ -113,6 +166,11 @@ class _TutorMainLayoutState extends State<TutorMainLayout> {
             icon: Icon(Icons.search_outlined),
             activeIcon: Icon(Icons.search),
             label: 'Find Students',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.assignment_outlined),
+            activeIcon: Icon(Icons.assignment),
+            label: 'Applications',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),

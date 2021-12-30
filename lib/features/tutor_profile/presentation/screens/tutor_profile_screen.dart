@@ -58,6 +58,7 @@ class _PersonalTab extends StatefulWidget {
 
 class _PersonalTabState extends State<_PersonalTab> {
   late final TextEditingController _nameController;
+  late final TextEditingController _emailController;
   late final TextEditingController _phoneController;
   LocationSelection _location = const LocationSelection(province: '', district: '', area: '');
 
@@ -65,6 +66,7 @@ class _PersonalTabState extends State<_PersonalTab> {
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.user?.fullName);
+    _emailController = TextEditingController(text: widget.user?.email);
     _phoneController = TextEditingController(text: widget.user?.phoneNumber);
     if (widget.user != null) {
       _location = LocationSelection(
@@ -78,6 +80,7 @@ class _PersonalTabState extends State<_PersonalTab> {
   @override
   void dispose() {
     _nameController.dispose();
+    _emailController.dispose();
     _phoneController.dispose();
     super.dispose();
   }
@@ -100,6 +103,38 @@ class _PersonalTabState extends State<_PersonalTab> {
     }
   }
 
+  Future<void> _handleAvatarUpload() async {
+    final user = AuthProviderInherited.of(context).user;
+    if (user == null) return;
+
+    final result = await FilePicker.pickFiles(type: FileType.image);
+    if (result != null && result.files.single.path != null) {
+      try {
+        final file = File(result.files.single.path!);
+        final url = await StorageService().uploadAvatar(
+          uid: user.id,
+          file: file,
+        );
+        if (url != null && mounted) {
+          await AuthProviderInherited.of(context).updateTutorProfile(
+            avatarUrl: url,
+          );
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Avatar updated successfully!')),
+            );
+          }
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to upload avatar: $e')),
+          );
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -113,18 +148,26 @@ class _PersonalTabState extends State<_PersonalTab> {
                 CircleAvatar(
                   radius: 50,
                   backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.1),
-                  child: Icon(Icons.person, size: 50, color: theme.colorScheme.primary),
+                  backgroundImage: widget.user?.avatarUrl != null && widget.user!.avatarUrl!.isNotEmpty
+                      ? NetworkImage(widget.user!.avatarUrl!)
+                      : null,
+                  child: widget.user?.avatarUrl == null || widget.user!.avatarUrl!.isEmpty
+                      ? Icon(Icons.person, size: 50, color: theme.colorScheme.primary)
+                      : null,
                 ),
                 Positioned(
                   bottom: 0,
                   right: 0,
-                  child: Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primary,
-                      shape: BoxShape.circle,
+                  child: InkWell(
+                    onTap: _handleAvatarUpload,
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primary,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(Icons.camera_alt, size: 18, color: theme.colorScheme.onPrimary),
                     ),
-                    child: Icon(Icons.camera_alt, size: 16, color: theme.colorScheme.onPrimary),
                   ),
                 ),
               ],
@@ -133,7 +176,7 @@ class _PersonalTabState extends State<_PersonalTab> {
           const SizedBox(height: AppSpacing.xl),
           AppTextField(label: 'Full Name', controller: _nameController),
           const SizedBox(height: AppSpacing.md),
-          AppTextField(label: 'Email (Read Only)', controller: TextEditingController(text: widget.user?.email), readOnly: true),
+          AppTextField(label: 'Email (Read Only)', controller: _emailController, readOnly: true),
           const SizedBox(height: AppSpacing.md),
           AppTextField(label: 'Phone Number', controller: _phoneController),
           const SizedBox(height: AppSpacing.md),

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../core/theme/app_theme.dart';
-import '../features/auth/presentation/providers/auth_provider.dart';
+import 'package:tutormate/features/auth/presentation/providers/auth_provider.dart';
+export 'package:tutormate/features/auth/presentation/providers/auth_provider.dart';
 import '../features/auth/data/repositories/firebase_auth_repository_impl.dart';
 import 'router.dart';
 

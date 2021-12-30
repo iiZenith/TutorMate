@@ -147,8 +147,7 @@ class _MyRequestsScreenState extends State<MyRequestsScreen> {
             ),
           );
         },
-      );
-    },
+      ),
     );
   }
 }

@@ -36,6 +36,17 @@ class FirebaseAuthRepositoryImpl implements AuthRepository {
   @override
   AppUser? get currentUser => _cachedUser;
 
+  List<String> _parseStringList(dynamic val) {
+    if (val == null) return [];
+    if (val is List) {
+      return val.map((e) => e.toString()).where((e) => e.isNotEmpty).toList();
+    }
+    if (val is String && val.trim().isNotEmpty) {
+      return val.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+    }
+    return [];
+  }
+
   Future<AppUser?> _fetchAppUser(String uid) async {
     final doc = await _firestore.collection('users').doc(uid).get();
     if (!doc.exists) return null;
@@ -61,13 +72,13 @@ class FirebaseAuthRepositoryImpl implements AuthRepository {
       role: parsedRole,
       isEmailVerified: isEmailVerified,
       isProfileComplete: data['isProfileComplete'] ?? false,
-      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.fromMillisecondsSinceEpoch(0),
       studentType: data['studentType'] as String?,
       studentGradeLevel: data['studentGradeLevel'] as String?,
-      subjects: List<String>.from(data['subjects'] ?? []),
+      subjects: _parseStringList(data['subjects']),
       headline: data['headline'] as String?,
       bio: data['bio'] as String?,
-      teachingLevels: List<String>.from(data['teachingLevels'] ?? []),
+      teachingLevels: _parseStringList(data['teachingLevels']),
       expectedMonthlyRate: (data['expectedMonthlyRate'] as num?)?.toInt(),
       expectedHourlyRate: (data['expectedHourlyRate'] as num?)?.toInt(),
       highestQualification: data['highestQualification'] as String?,
@@ -239,6 +250,7 @@ class FirebaseAuthRepositoryImpl implements AuthRepository {
     String? province,
     String? district,
     String? area,
+    String? avatarUrl,
   }) async {
     try {
       final updates = <String, dynamic>{};
@@ -251,6 +263,7 @@ class FirebaseAuthRepositoryImpl implements AuthRepository {
       if (province != null) updates['province'] = province;
       if (district != null) updates['district'] = district;
       if (area != null) updates['area'] = area;
+      if (avatarUrl != null) updates['avatarUrl'] = avatarUrl;
 
       if (updates.isNotEmpty) {
         await _firestore.collection('users').doc(userId).update(updates);
@@ -303,6 +316,7 @@ class FirebaseAuthRepositoryImpl implements AuthRepository {
       if (verificationStatus != null) updates['verificationStatus'] = verificationStatus;
       if (citizenshipUrl != null) updates['citizenshipUrl'] = citizenshipUrl;
       if (transcriptUrl != null) updates['transcriptUrl'] = transcriptUrl;
+      if (avatarUrl != null) updates['avatarUrl'] = avatarUrl;
       if (isProfileComplete != null) updates['isProfileComplete'] = isProfileComplete;
 
       if (updates.isNotEmpty) {

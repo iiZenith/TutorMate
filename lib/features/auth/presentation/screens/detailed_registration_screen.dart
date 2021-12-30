@@ -40,11 +40,37 @@ class _DetailedRegistrationScreenState extends State<DetailedRegistrationScreen>
     _emailController = TextEditingController(text: widget.initialEmail);
   }
 
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _phoneController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
+  }
+
+  void _showPolicyDialog(String title, String content) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(title),
+        content: SingleChildScrollView(child: Text(content)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _submit() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
     if (!_agreeToTerms) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('You must agree to the Terms of Use'))
+        const SnackBar(content: Text('You must agree to the Terms of Use and Privacy Policy'))
       );
       return;
     }
@@ -71,6 +97,7 @@ class _DetailedRegistrationScreenState extends State<DetailedRegistrationScreen>
       parsedRole,
       phoneNumber: _phoneController.text.trim(),
       gender: _selectedGender,
+      province: _location.province,
       district: _location.district,
       area: _location.area,
     );
@@ -85,6 +112,7 @@ class _DetailedRegistrationScreenState extends State<DetailedRegistrationScreen>
   @override
   Widget build(BuildContext context) {
     final authProvider = AuthProviderInherited.of(context);
+    final theme = Theme.of(context);
 
     return AuthFloatingCardLayout(
       title: 'Create Account',
@@ -98,13 +126,14 @@ class _DetailedRegistrationScreenState extends State<DetailedRegistrationScreen>
             AppTextField(
               label: 'Full Name', 
               controller: _nameController, 
-              validator: (v) => v!.isEmpty ? 'Required' : null
+              validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null
             ),
             const SizedBox(height: 16),
             AppTextField(
               label: 'Phone Number', 
               controller: _phoneController, 
-              keyboardType: TextInputType.phone
+              keyboardType: TextInputType.phone,
+              validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null
             ),
             const SizedBox(height: 16),
             AppTextField(
@@ -134,13 +163,14 @@ class _DetailedRegistrationScreenState extends State<DetailedRegistrationScreen>
               label: 'Password', 
               controller: _passwordController, 
               isPassword: true, 
-              validator: (v) => v!.length < 6 ? 'Min 6 chars' : null
+              validator: (v) => v == null || v.length < 6 ? 'Min 6 chars' : null
             ),
             const SizedBox(height: 16),
             AppTextField(
               label: 'Confirm Password', 
               controller: _confirmPasswordController, 
-              isPassword: true
+              isPassword: true,
+              validator: (v) => v == null || v.isEmpty ? 'Please confirm password' : null
             ),
             const SizedBox(height: 16),
             Row(
@@ -150,10 +180,33 @@ class _DetailedRegistrationScreenState extends State<DetailedRegistrationScreen>
                   onChanged: (v) => setState(() => _agreeToTerms = v ?? false)
                 ),
                 Expanded(
-                  child: Text(
-                    'I agree to the Terms of Use and Privacy Policy', 
-                    style: Theme.of(context).textTheme.bodySmall
-                  )
+                  child: Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      Text('I agree to the ', style: theme.textTheme.bodySmall),
+                      InkWell(
+                        onTap: () => _showPolicyDialog('Terms of Use', 'TutorMate Terms of Use:\n1. All users must provide authentic information.\n2. Tutors must undergo verification.\n3. Content violating platform policy is strictly prohibited.'),
+                        child: Text(
+                          'Terms of Use', 
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.primary, 
+                            decoration: TextDecoration.underline
+                          )
+                        ),
+                      ),
+                      Text(' and ', style: theme.textTheme.bodySmall),
+                      InkWell(
+                        onTap: () => _showPolicyDialog('Privacy Policy', 'TutorMate Privacy Policy:\n1. We respect your personal data privacy.\n2. User data is strictly used for tutoring matching.\n3. Documents are stored securely on Firebase Storage.'),
+                        child: Text(
+                          'Privacy Policy', 
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.primary, 
+                            decoration: TextDecoration.underline
+                          )
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),

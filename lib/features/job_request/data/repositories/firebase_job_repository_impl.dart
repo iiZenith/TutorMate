@@ -2,15 +2,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../domain/models/job_request_model.dart';
 import '../../domain/models/tutor_interest_model.dart';
 import '../../domain/repositories/job_repository.dart';
+import '../../../notifications/data/repositories/firebase_notification_repository_impl.dart';
 
 class FirebaseJobRepositoryImpl implements JobRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final _notificationRepo = FirebaseNotificationRepositoryImpl();
 
   @override
   Future<void> createJobRequest(JobRequestModel job) async {
     final docRef = _firestore.collection('job_requests').doc();
     
-    // Create a new map to merge serverTimestamp correctly based on the model's toMap()
     final map = job.toMap();
     map['jobId'] = docRef.id;
     
@@ -28,17 +29,19 @@ class FirebaseJobRepositoryImpl implements JobRepository {
     if (district != null && district.isNotEmpty) {
       query = query.where('district', isEqualTo: district);
     }
+
     if (subject != null && subject.isNotEmpty) {
       query = query.where('subjects', arrayContains: subject);
     }
+
     if (minBudget != null && minBudget > 0) {
       query = query.where('budgetNpr', isGreaterThanOrEqualTo: minBudget);
     }
 
     return query.snapshots().map((snapshot) {
-      var jobs = snapshot.docs.map((doc) {
-        return JobRequestModel.fromMap(doc.data() as Map<String, dynamic>, doc.id);
-      }).toList();
+      final jobs = snapshot.docs
+          .map((doc) => JobRequestModel.fromMap(doc.data() as Map<String, dynamic>, doc.id))
+          .toList();
       jobs.sort((a, b) => b.createdAt.compareTo(a.createdAt));
       return jobs;
     });
@@ -51,9 +54,9 @@ class FirebaseJobRepositoryImpl implements JobRepository {
         .where('studentId', isEqualTo: studentId)
         .snapshots()
         .map((snapshot) {
-      final jobs = snapshot.docs.map((doc) {
-        return JobRequestModel.fromMap(doc.data(), doc.id);
-      }).toList();
+      final jobs = snapshot.docs
+          .map((doc) => JobRequestModel.fromMap(doc.data() as Map<String, dynamic>, doc.id))
+          .toList();
       jobs.sort((a, b) => b.createdAt.compareTo(a.createdAt));
       return jobs;
     });
@@ -61,20 +64,20 @@ class FirebaseJobRepositoryImpl implements JobRepository {
 
   @override
   Future<void> expressInterest({
-    required String jobId,
-    required String tutorId,
+    required String jobId, 
+    required String tutorId, 
     required String tutorName,
   }) async {
     final docId = '${jobId}_$tutorId';
     final docRef = _firestore.collection('tutor_interests').doc(docId);
     
-    final docSnapshot = await docRef.get();
-    if (docSnapshot.exists) {
-      throw Exception('You have already expressed interest in this tuition.');
+    final existing = await docRef.get();
+    if (existing.exists) {
+      throw Exception('You have already expressed interest in this job request.');
     }
 
     final interest = TutorInterestModel(
-      id: docRef.id,
+      interestId: docId,
       jobId: jobId,
       tutorId: tutorId,
       tutorName: tutorName,
@@ -83,6 +86,19 @@ class FirebaseJobRepositoryImpl implements JobRepository {
     );
 
     await docRef.set(interest.toMap());
+
+    final jobDoc = await _firestore.collection('job_requests').doc(jobId).get();
+    if (jobDoc.exists) {
+      final studentId = jobDoc.data()?['studentId'];
+      if (studentId != null) {
+        _notificationRepo.sendNotification(
+          userId: studentId,
+          title: 'New Tutor Interest',
+          body: '$tutorName expressed interest in your tuition requirement.',
+          type: 'interest_received',
+        );
+      }
+    }
   }
 
   @override
@@ -133,15 +149,12 @@ class FirebaseJobRepositoryImpl implements JobRepository {
 
     final batch = _firestore.batch();
     
-    // Update target interest status to accepted
     final interestRef = _firestore.collection('tutor_interests').doc(interestId);
     batch.update(interestRef, {'status': 'accepted'});
 
-    // Update job status to accepted
     final jobRef = _firestore.collection('job_requests').doc(jobId);
     batch.update(jobRef, {'status': 'accepted'});
 
-    // Reject all other pending interests for this job
     final otherInterests = await _firestore
         .collection('tutor_interests')
         .where('jobId', isEqualTo: jobId)
@@ -155,6 +168,16 @@ class FirebaseJobRepositoryImpl implements JobRepository {
     }
 
     await batch.commit();
+
+    final tutorId = interestDoc.data()?['tutorId'];
+    if (tutorId != null) {
+      _notificationRepo.sendNotification(
+        userId: tutorId,
+        title: 'Application Accepted!',
+        body: 'Your tuition application was accepted by the student.',
+        type: 'application_accepted',
+      );
+    }
   }
 
   @override
@@ -180,6 +203,16 @@ class FirebaseJobRepositoryImpl implements JobRepository {
     await _firestore.collection('tutor_interests').doc(interestId).update({
       'status': 'rejected',
     });
+
+    final tutorId = interestDoc.data()?['tutorId'];
+    if (tutorId != null) {
+      _notificationRepo.sendNotification(
+        userId: tutorId,
+        title: 'Application Status Update',
+        body: 'Your interest for the tuition request was marked as not selected.',
+        type: 'application_rejected',
+      );
+    }
   }
 
   @override

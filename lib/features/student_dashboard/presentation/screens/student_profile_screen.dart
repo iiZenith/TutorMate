@@ -1,10 +1,13 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:file_picker/file_picker.dart';
 import '../../../../app/app.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../shared/widgets/app_button.dart';
 import '../../../../shared/widgets/app_text_field.dart';
 import '../../../../shared/widgets/app_radio_group.dart';
 import '../../../../shared/widgets/dynamic_location_selector.dart';
+import '../../../../shared/services/storage/storage_service.dart';
 
 class StudentProfileScreen extends StatefulWidget {
   const StudentProfileScreen({super.key});
@@ -43,6 +46,41 @@ class _StudentProfileScreenState extends State<StudentProfileScreen> {
     _nameController.dispose();
     _phoneController.dispose();
     super.dispose();
+  }
+
+  Future<void> _handleAvatarUpload() async {
+    final user = AuthProviderInherited.of(context).user;
+    if (user == null) return;
+
+    final result = await FilePicker.pickFiles(type: FileType.image);
+    if (result != null && result.files.single.path != null) {
+      setState(() => _isSaving = true);
+      try {
+        final file = File(result.files.single.path!);
+        final url = await StorageService().uploadAvatar(
+          uid: user.id,
+          file: file,
+        );
+        if (url != null && mounted) {
+          await AuthProviderInherited.of(context).updateStudentProfile(
+            avatarUrl: url,
+          );
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Avatar updated successfully!')),
+            );
+          }
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to upload avatar: $e')),
+          );
+        }
+      } finally {
+        if (mounted) setState(() => _isSaving = false);
+      }
+    }
   }
 
   void _saveProfile() async {
@@ -99,17 +137,41 @@ class _StudentProfileScreenState extends State<StudentProfileScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Center(
-              child: CircleAvatar(
-                radius: 45,
-                backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.1),
-                child: Text(
-                  (user?.fullName.isNotEmpty == true ? user!.fullName : 'S')[0].toUpperCase(),
-                  style: TextStyle(
-                    color: theme.colorScheme.primary, 
-                    fontSize: 36, 
-                    fontWeight: FontWeight.bold,
+              child: Stack(
+                children: [
+                  CircleAvatar(
+                    radius: 45,
+                    backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.1),
+                    backgroundImage: user?.avatarUrl != null && user!.avatarUrl!.isNotEmpty
+                        ? NetworkImage(user.avatarUrl!)
+                        : null,
+                    child: user?.avatarUrl == null || user!.avatarUrl!.isEmpty
+                        ? Text(
+                            (user?.fullName.isNotEmpty == true ? user!.fullName : 'S')[0].toUpperCase(),
+                            style: TextStyle(
+                              color: theme.colorScheme.primary, 
+                              fontSize: 36, 
+                              fontWeight: FontWeight.bold,
+                            ),
+                          )
+                        : null,
                   ),
-                ),
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: InkWell(
+                      onTap: _handleAvatarUpload,
+                      child: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.primary,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(Icons.camera_alt, size: 18, color: theme.colorScheme.onPrimary),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: AppSpacing.md),
