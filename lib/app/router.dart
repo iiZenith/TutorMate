@@ -19,7 +19,6 @@ import '../features/student_dashboard/presentation/screens/student_main_layout.d
 import '../features/student_dashboard/presentation/screens/student_profile_screen.dart';
 import '../features/student_dashboard/presentation/screens/student_dashboard_content.dart';
 import '../features/tutor_dashboard/presentation/screens/tutor_main_layout.dart';
-import '../features/notifications/presentation/screens/notifications_screen.dart';
 
 GoRouter createAppRouter(AuthProvider authProvider) {
   return GoRouter(
@@ -163,10 +162,6 @@ GoRouter createAppRouter(AuthProvider authProvider) {
       GoRoute(
         path: '/dashboard/tutor',
         builder: (context, state) => const TutorMainLayout(),
-      ),
-      GoRoute(
-        path: '/notifications',
-        builder: (context, state) => const NotificationsScreen(),
       ),
     ],
   );

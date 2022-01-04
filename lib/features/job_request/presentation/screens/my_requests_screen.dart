@@ -91,63 +91,65 @@ class _MyRequestsScreenState extends State<MyRequestsScreen> {
             padding: const EdgeInsets.all(AppSpacing.md),
             itemCount: requests.length,
             itemBuilder: (context, index) {
-            final job = requests[index];
-            return Card(
-              elevation: 4,
-              shadowColor: theme.shadowColor.withValues(alpha: 0.1),
-              margin: const EdgeInsets.only(bottom: AppSpacing.md),
-              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(AppRadii.large))),
-              child: InkWell(
-                onTap: () {
-                  context.push('/request-details', extra: job);
-                },
-                borderRadius: const BorderRadius.all(Radius.circular(AppRadii.large)),
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.lg),
-                  child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
+              final job = requests[index];
+              return Card(
+                elevation: 4,
+                shadowColor: theme.shadowColor.withValues(alpha: 0.1),
+                margin: const EdgeInsets.only(bottom: AppSpacing.md),
+                shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(AppRadii.large))),
+                child: InkWell(
+                  onTap: () {
+                    context.push('/request-details', extra: job);
+                  },
+                  borderRadius: const BorderRadius.all(Radius.circular(AppRadii.large)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(AppSpacing.lg),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Expanded(
-                          child: Text(
-                            job.subjects.isNotEmpty ? job.subjects.join(', ') : 'General Subjects',
-                            style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: job.status == 'open'
-                                ? theme.colorScheme.primary.withValues(alpha: 0.1)
-                                : theme.colorScheme.onSurface.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            job.status.toUpperCase(),
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              color: job.status == 'open'
-                                  ? theme.colorScheme.primary
-                                  : theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                              fontWeight: FontWeight.bold,
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                job.subjects.isNotEmpty ? job.subjects.join(', ') : 'General Subjects',
+                                style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                              ),
                             ),
-                          ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: job.status == 'open'
+                                    ? theme.colorScheme.primary.withValues(alpha: 0.1)
+                                    : theme.colorScheme.onSurface.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                job.status.toUpperCase(),
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  color: job.status == 'open'
+                                      ? theme.colorScheme.primary
+                                      : theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
+                        const SizedBox(height: AppSpacing.md),
+                        _InfoRow(icon: Icons.school_outlined, text: job.grade),
+                        const SizedBox(height: AppSpacing.xs),
+                        _InfoRow(icon: Icons.location_on_outlined, text: '${job.district} - ${job.area}'),
+                        const SizedBox(height: AppSpacing.xs),
+                        _InfoRow(icon: Icons.account_balance_wallet_outlined, text: 'Rs. ${job.budgetNpr} / month'),
                       ],
                     ),
-                    const SizedBox(height: AppSpacing.md),
-                    _InfoRow(icon: Icons.school_outlined, text: job.grade),
-                    const SizedBox(height: AppSpacing.xs),
-                    _InfoRow(icon: Icons.location_on_outlined, text: '${job.district} - ${job.area}'),
-                    const SizedBox(height: AppSpacing.xs),
-                    _InfoRow(icon: Icons.account_balance_wallet_outlined, text: 'Rs. ${job.budgetNpr} / month'),
-                  ],
+                  ),
                 ),
-              ),
-            ),
-          );
-        },
-      ),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 }

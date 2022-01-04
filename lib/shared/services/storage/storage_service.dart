@@ -24,23 +24,4 @@ class StorageService {
       return null;
     }
   }
-
-  Future<String?> uploadAvatar({
-    required String uid,
-    required File file,
-  }) async {
-    try {
-      final ext = p.extension(file.path);
-      final timestamp = DateTime.now().millisecondsSinceEpoch;
-      final fileName = 'avatar_$timestamp$ext';
-      final path = 'users/$uid/avatar/$fileName';
-
-      final ref = _storage.ref().child(path);
-      final uploadTask = await ref.putFile(file);
-      final downloadUrl = await uploadTask.ref.getDownloadURL();
-      return downloadUrl;
-    } catch (e) {
-      return null;
-    }
-  }
 }

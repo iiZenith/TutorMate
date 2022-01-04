@@ -47,7 +47,6 @@ abstract class AuthRepository {
     String? province,
     String? district,
     String? area,
-    String? avatarUrl,
   });
 
   Future<void> updateTutorProfile({
@@ -70,7 +69,6 @@ abstract class AuthRepository {
     String? verificationStatus,
     String? citizenshipUrl,
     String? transcriptUrl,
-    String? avatarUrl,
     bool? isProfileComplete,
   });
 }

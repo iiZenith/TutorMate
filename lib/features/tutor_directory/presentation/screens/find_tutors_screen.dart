@@ -4,7 +4,6 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_radii.dart';
 import '../../../../shared/widgets/app_button.dart';
 import '../../../../shared/widgets/dynamic_location_selector.dart';
-import '../../../../shared/widgets/dynamic_subject_selector.dart';
 import '../../../../shared/widgets/app_text_field.dart';
 import '../../domain/models/tutor_model.dart';
 import '../../data/repositories/firebase_tutor_repository_impl.dart';
@@ -22,6 +21,15 @@ class _FindTutorsScreenState extends State<FindTutorsScreen> {
   LocationSelection _location = const LocationSelection(province: '', district: '', area: '');
   String? _selectedSubject;
   int? _maxSalary;
+
+  final List<String> _availableSubjects = [
+    'Social',
+    'Nepali',
+    'English',
+    'Math',
+    'Science',
+    'Health',
+  ];
 
   void _showFilterBottomSheet(BuildContext context) {
     LocationSelection tempLocation = _location;
@@ -47,7 +55,7 @@ class _FindTutorsScreenState extends State<FindTutorsScreen> {
               ),
               child: SingleChildScrollView(
                 child: Column(
-                  mainAxisSize: MyAxisSize.min,
+                  mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Center(
@@ -75,14 +83,21 @@ class _FindTutorsScreenState extends State<FindTutorsScreen> {
                     
                     Text('Subject', style: theme.textTheme.labelLarge),
                     const SizedBox(height: AppSpacing.sm),
-                    DynamicSubjectSelector(
-                      selectedSubjects: tempSubject != null ? [tempSubject!] : [],
-                      multiSelect: false,
-                      onChanged: (subjects) {
-                        setStateSB(() {
-                          tempSubject = subjects.isNotEmpty ? subjects.first : null;
-                        });
-                      },
+                    Wrap(
+                      spacing: 8.0,
+                      runSpacing: 4.0,
+                      children: _availableSubjects.map((subject) {
+                        final isSelected = tempSubject == subject;
+                        return ChoiceChip(
+                          label: Text(subject),
+                          selected: isSelected,
+                          onSelected: (selected) {
+                            setStateSB(() {
+                              tempSubject = selected ? subject : null;
+                            });
+                          },
+                        );
+                      }).toList(),
                     ),
                     const SizedBox(height: AppSpacing.lg),
 

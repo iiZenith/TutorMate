@@ -17,22 +17,6 @@ class _QuickEntryScreenState extends State<QuickEntryScreen> {
   final _formKey = GlobalKey<FormState>();
 
   @override
-  void dispose() {
-    _emailController.dispose();
-    super.dispose();
-  }
-
-  String? _validateEmail(String? v) {
-    if (v == null || v.trim().isEmpty) return 'Email is required';
-    final email = v.trim();
-    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-    if (!emailRegex.hasMatch(email)) {
-      return 'Please enter a valid email address';
-    }
-    return null;
-  }
-
-  @override
   Widget build(BuildContext context) {
     String title = widget.role == 'Student' ? 'Need a Tutor?' : 'Register as a ${widget.role}';
     IconData icon = widget.role == 'Student' ? Icons.search : Icons.person_add;
@@ -56,7 +40,7 @@ class _QuickEntryScreenState extends State<QuickEntryScreen> {
               hint: 'Enter your email to continue',
               controller: _emailController,
               keyboardType: TextInputType.emailAddress,
-              validator: _validateEmail,
+              validator: (v) => v == null || v.isEmpty ? 'Email is required' : null,
             ),
             const SizedBox(height: 24),
             AppButton(
