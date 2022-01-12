@@ -4,6 +4,7 @@ class JobRequestModel {
   final String jobId;
   final String studentId;
   final String studentName;
+  final String? province;
   final String district;
   final String area;
   final String grade;
@@ -16,6 +17,7 @@ class JobRequestModel {
     required this.jobId,
     required this.studentId,
     required this.studentName,
+    this.province,
     required this.district,
     required this.area,
     required this.grade,
@@ -30,6 +32,7 @@ class JobRequestModel {
       'jobId': jobId,
       'studentId': studentId,
       'studentName': studentName,
+      if (province != null) 'province': province,
       'district': district,
       'area': area,
       'grade': grade,
@@ -45,6 +48,7 @@ class JobRequestModel {
       jobId: id,
       studentId: map['studentId'] as String? ?? '',
       studentName: map['studentName'] as String? ?? '',
+      province: map['province'] as String?,
       district: map['district'] as String? ?? '',
       area: map['area'] as String? ?? '',
       grade: map['grade'] as String? ?? '',
@@ -53,7 +57,7 @@ class JobRequestModel {
       status: map['status'] as String? ?? 'open',
       createdAt: map['createdAt'] != null && map['createdAt'] is Timestamp
           ? (map['createdAt'] as Timestamp).toDate()
-          : DateTime.now(),
+          : DateTime.fromMillisecondsSinceEpoch(0),
     );
   }
 }

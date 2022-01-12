@@ -46,6 +46,7 @@ class _HireTutorScreenState extends State<HireTutorScreen> {
         jobId: '', // Handled dynamically in repo
         studentId: user.id,
         studentName: user.fullName,
+        province: _location.province,
         district: _location.district,
         area: _location.area,
         grade: _selectedGrade ?? '',
