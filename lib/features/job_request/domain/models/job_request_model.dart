@@ -50,6 +50,25 @@ class JobRequestModel {
     required this.createdAt,
   });
 
+  static int _parseBudget(dynamic val) {
+    if (val is num) return val.toInt();
+    if (val is String) {
+      final parsed = int.tryParse(val.trim());
+      if (parsed != null && parsed >= 0) return parsed;
+    }
+    return 0;
+  }
+
+  static DateTime _parseTimestamp(dynamic val) {
+    if (val is Timestamp) return val.toDate();
+    if (val is DateTime) return val;
+    if (val is String) {
+      final parsed = DateTime.tryParse(val);
+      if (parsed != null) return parsed;
+    }
+    return DateTime.fromMillisecondsSinceEpoch(0);
+  }
+
   Map<String, dynamic> toMap() {
     return {
       'jobId': jobId,
@@ -76,11 +95,9 @@ class JobRequestModel {
       area: map['area'] as String? ?? '',
       grade: map['grade'] as String? ?? '',
       subjects: List<String>.from((map['subjects'] as List?) ?? []),
-      budgetNpr: (map['budgetNpr'] as num?)?.toInt() ?? 0,
+      budgetNpr: _parseBudget(map['budgetNpr']),
       status: map['status'] as String? ?? 'open',
-      createdAt: map['createdAt'] != null && map['createdAt'] is Timestamp
-          ? (map['createdAt'] as Timestamp).toDate()
-          : DateTime.fromMillisecondsSinceEpoch(0),
+      createdAt: _parseTimestamp(map['createdAt']),
     );
   }
 }
