@@ -1,5 +1,28 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+enum JobRequestStatus {
+  open,
+  accepted,
+  rejected,
+  cancelled;
+
+  static JobRequestStatus fromString(String? val) {
+    if (val == null) return JobRequestStatus.open;
+    switch (val.toLowerCase().trim()) {
+      case 'accepted':
+        return JobRequestStatus.accepted;
+      case 'rejected':
+        return JobRequestStatus.rejected;
+      case 'cancelled':
+      case 'canceled':
+        return JobRequestStatus.cancelled;
+      case 'open':
+      default:
+        return JobRequestStatus.open;
+    }
+  }
+}
+
 class JobRequestModel {
   final String jobId;
   final String studentId;
