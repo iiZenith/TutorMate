@@ -192,8 +192,37 @@ class FirebaseJobRepositoryImpl implements JobRepository {
       throw Exception('Unauthorized or job request not found.');
     }
 
-    await _firestore.collection('job_requests').doc(jobId).update({
-      'status': 'cancelled',
-    });
+    final currentStatus = jobDoc.data()?['status'] as String? ?? 'open';
+    if (currentStatus == 'cancelled' || currentStatus == 'accepted') {
+      throw Exception('Job request cannot be cancelled in its current state.');
+    }
+
+    final batch = _firestore.batch();
+    final jobRef = _firestore.collection('job_requests').doc(jobId);
+    batch.update(jobRef, {'status': 'cancelled'});
+
+    final interests = await _firestore
+        .collection('tutor_interests')
+        .where('jobId', isEqualTo: jobId)
+        .where('status', isEqualTo: 'submitted')
+        .get();
+
+    for (var doc in interests.docs) {
+      batch.update(doc.reference, {'status': 'rejected'});
+    }
+
+    await batch.commit();
+
+    for (var doc in interests.docs) {
+      final tutorId = doc.data()['tutorId'] as String?;
+      if (tutorId != null && tutorId.isNotEmpty) {
+        _notificationRepo.sendNotification(
+          userId: tutorId,
+          title: 'Tuition Request Cancelled',
+          body: 'The tuition request you applied for has been cancelled by the student.',
+          type: 'job_cancelled',
+        );
+      }
+    }
   }
 }
