@@ -193,7 +193,17 @@ class _RequestDetailsScreenState extends State<RequestDetailsScreen> {
                                   ),
                                 ],
                               )
-                            : null,
+                            : interest.status == 'accepted'
+                                ? ElevatedButton.icon(
+                                    icon: const Icon(Icons.phone, size: 16),
+                                    label: const Text('Contact'),
+                                    onPressed: () {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(content: Text('Contact tutor ${interest.tutorName} via registered phone/email.')),
+                                      );
+                                    },
+                                  )
+                                : null,
                       ),
                     );
                   },
