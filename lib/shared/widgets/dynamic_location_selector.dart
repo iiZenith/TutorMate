@@ -48,7 +48,23 @@ class _DynamicLocationSelectorState extends State<DynamicLocationSelector> {
     _loadLocations();
   }
 
+  @override
+  void didUpdateWidget(covariant DynamicLocationSelector oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.value != widget.value) {
+      setState(() {
+        _selectedProvince = widget.value?.province.isNotEmpty == true ? widget.value?.province : null;
+        _selectedDistrict = widget.value?.district.isNotEmpty == true ? widget.value?.district : null;
+        _selectedArea = widget.value?.area.isNotEmpty == true ? widget.value?.area : null;
+      });
+    }
+  }
+
   Future<void> _loadLocations() async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
     try {
       final data = await _locationService.getLocationsTree();
       if (mounted) {
@@ -77,6 +93,8 @@ class _DynamicLocationSelectorState extends State<DynamicLocationSelector> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     if (_isLoading) {
       return const Padding(
         padding: EdgeInsets.symmetric(vertical: 16.0),
@@ -87,12 +105,20 @@ class _DynamicLocationSelectorState extends State<DynamicLocationSelector> {
     if (_error != null) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 16.0),
-        child: Center(
-          child: Text(
-            'Failed to load locations: $_error', 
-            style: TextStyle(color: Theme.of(context).colorScheme.error),
-            textAlign: TextAlign.center,
-          ),
+        child: Column(
+          children: [
+            Text(
+              'Failed to load locations: $_error', 
+              style: TextStyle(color: theme.colorScheme.error),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            ElevatedButton.icon(
+              onPressed: _loadLocations,
+              icon: const Icon(Icons.refresh, size: 16),
+              label: const Text('Retry'),
+            ),
+          ],
         ),
       );
     }

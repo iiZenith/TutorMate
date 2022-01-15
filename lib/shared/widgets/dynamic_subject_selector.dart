@@ -31,7 +31,21 @@ class _DynamicSubjectSelectorState extends State<DynamicSubjectSelector> {
     _loadSubjects();
   }
 
+  @override
+  void didUpdateWidget(covariant DynamicSubjectSelector oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.selectedSubjects != widget.selectedSubjects) {
+      setState(() {
+        _currentSelection = List.from(widget.selectedSubjects);
+      });
+    }
+  }
+
   Future<void> _loadSubjects() async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
     try {
       final subjects = await _service.getSubjects();
       if (mounted) {
@@ -52,6 +66,8 @@ class _DynamicSubjectSelectorState extends State<DynamicSubjectSelector> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     if (_isLoading) {
       return const Padding(
         padding: EdgeInsets.symmetric(vertical: 8.0),
@@ -62,9 +78,20 @@ class _DynamicSubjectSelectorState extends State<DynamicSubjectSelector> {
     if (_error != null) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 8.0),
-        child: Text(
-          'Failed to load subjects.',
-          style: TextStyle(color: Theme.of(context).colorScheme.error),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                'Failed to load subjects.',
+                style: TextStyle(color: theme.colorScheme.error),
+              ),
+            ),
+            TextButton.icon(
+              onPressed: _loadSubjects,
+              icon: const Icon(Icons.refresh, size: 16),
+              label: const Text('Retry'),
+            ),
+          ],
         ),
       );
     }
