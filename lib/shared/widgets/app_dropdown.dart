@@ -6,6 +6,7 @@ class AppDropdown extends StatelessWidget {
   final List<String> items;
   final ValueChanged<String?> onChanged;
   final String? hint;
+  final bool isRequired;
 
   const AppDropdown({
     super.key,
@@ -14,6 +15,7 @@ class AppDropdown extends StatelessWidget {
     required this.items,
     required this.onChanged,
     this.hint,
+    this.isRequired = true,
   });
 
   @override
@@ -24,13 +26,15 @@ class AppDropdown extends StatelessWidget {
         Text(label, style: Theme.of(context).textTheme.labelLarge),
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
-          initialValue: value,
+          value: items.contains(value) ? value : null,
           hint: hint != null ? Text(hint!) : null,
           items: items
               .map((e) => DropdownMenuItem(value: e, child: Text(e)))
               .toList(),
           onChanged: onChanged,
-          validator: (v) => v == null || v.isEmpty ? 'Required field' : null,
+          validator: isRequired
+              ? (v) => v == null || v.isEmpty ? 'Required field' : null
+              : null,
           icon: const Icon(Icons.arrow_drop_down),
         ),
       ],
