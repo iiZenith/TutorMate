@@ -18,12 +18,20 @@ enum UserRole {
 
   static UserRole? fromString(String? roleStr) {
     if (roleStr == null || roleStr.isEmpty) return null;
-    try {
-      return UserRole.values.firstWhere(
-        (e) => e.name.toLowerCase() == roleStr.toLowerCase() || e.label.toLowerCase() == roleStr.toLowerCase()
-      );
-    } catch (_) {
-      return null;
+    final lower = roleStr.toLowerCase().trim();
+    if (lower == 'student' ||
+        lower == 'parent' ||
+        lower == 'guardian' ||
+        lower == 'studentguardian' ||
+        lower == 'student/guardian' ||
+        lower == 'student / guardian') {
+      return UserRole.studentGuardian;
     }
+    if (lower == 'tutor' ||
+        lower == 'independent tutor' ||
+        lower == 'independenttutor') {
+      return UserRole.tutor;
+    }
+    return null;
   }
 }
