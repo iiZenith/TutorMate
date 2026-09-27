@@ -16,16 +16,6 @@ class StudentMainLayout extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Dashboard'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('No new notifications')),
-              );
-            },
-          ),
-        ],
       ),
       drawer: Drawer(
         child: ListView(
@@ -33,12 +23,12 @@ class StudentMainLayout extends StatelessWidget {
           children: [
             UserAccountsDrawerHeader(
               decoration: BoxDecoration(color: theme.colorScheme.primary),
-              accountName: Text(user?.fullName ?? 'Student Name'),
-              accountEmail: Text(user?.email ?? 'student@example.com'),
+              accountName: Text(user?.fullName.isNotEmpty == true ? user!.fullName : 'Student'),
+              accountEmail: Text(user?.email.isNotEmpty == true ? user!.email : 'Not Provided'),
               currentAccountPicture: CircleAvatar(
                 backgroundColor: theme.colorScheme.onPrimary,
                 child: Text(
-                  (user?.fullName ?? 'S')[0].toUpperCase(),
+                  (user?.fullName.isNotEmpty == true ? user!.fullName : 'S')[0].toUpperCase(),
                   style: TextStyle(
                     color: theme.colorScheme.primary, 
                     fontSize: 24, 
@@ -48,7 +38,7 @@ class StudentMainLayout extends StatelessWidget {
               ),
               otherAccountsPictures: [
                 Tooltip(
-                  message: 'Guardian/Student ID: ${user?.id ?? '12345'}',
+                  message: 'Guardian/Student ID: ${user?.id ?? 'Unknown'}',
                   child: Icon(
                     Icons.info_outline, 
                     color: theme.colorScheme.onPrimary.withValues(alpha: 0.7)
@@ -61,7 +51,7 @@ class StudentMainLayout extends StatelessWidget {
               title: const Text('Dashboard'),
               onTap: () {
                 Navigator.pop(context);
-                context.go('/student/dashboard');
+                context.go('/dashboard/student');
               },
             ),
             ListTile(
@@ -77,10 +67,7 @@ class StudentMainLayout extends StatelessWidget {
               title: const Text('My Requests'),
               onTap: () {
                 Navigator.pop(context);
-                // Placeholder
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('My Requests page coming soon'))
-                );
+                context.go('/my-requests');
               },
             ),
             ListTile(
@@ -89,17 +76,6 @@ class StudentMainLayout extends StatelessWidget {
               onTap: () {
                 Navigator.pop(context);
                 context.go('/student/profile');
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.settings_outlined),
-              title: const Text('Settings'),
-              onTap: () {
-                Navigator.pop(context);
-                // Placeholder
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Settings page coming soon'))
-                );
               },
             ),
             const Divider(),

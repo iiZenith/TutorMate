@@ -38,16 +38,16 @@ class _TutorMainLayoutState extends State<TutorMainLayout> {
               decoration: BoxDecoration(color: theme.colorScheme.primary),
               accountName: Row(
                 children: [
-                  Text(user?.fullName ?? 'Tutor Name'),
+                  Text(user?.fullName.isNotEmpty == true ? user!.fullName : 'Tutor'),
                   const SizedBox(width: 8),
                   Icon(Icons.verified_user, size: 16, color: theme.colorScheme.onPrimary),
                 ],
               ),
-              accountEmail: Text(user?.email ?? 'tutor@example.com'),
+              accountEmail: Text(user?.email.isNotEmpty == true ? user!.email : 'Not Provided'),
               currentAccountPicture: CircleAvatar(
                 backgroundColor: theme.colorScheme.onPrimary,
                 child: Text(
-                  (user?.fullName ?? 'T')[0].toUpperCase(),
+                  (user?.fullName.isNotEmpty == true ? user!.fullName : 'T')[0].toUpperCase(),
                   style: TextStyle(
                     color: theme.colorScheme.primary, 
                     fontSize: 24, 
@@ -57,7 +57,7 @@ class _TutorMainLayoutState extends State<TutorMainLayout> {
               ),
               otherAccountsPictures: [
                 Tooltip(
-                  message: 'Tutor ID: ${user?.id ?? 'TUT-9988'}',
+                  message: 'Tutor ID: ${user?.id ?? 'Unknown'}',
                   child: Icon(
                     Icons.info_outline, 
                     color: theme.colorScheme.onPrimary.withValues(alpha: 0.7)

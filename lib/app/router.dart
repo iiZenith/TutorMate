@@ -9,8 +9,13 @@ import '../features/auth/presentation/screens/detailed_registration_screen.dart'
 import '../features/auth/presentation/providers/auth_provider.dart';
 import '../features/onboarding/presentation/screens/student_onboarding_screen.dart';
 import '../features/onboarding/presentation/screens/tutor_onboarding_screen.dart';
+import '../features/job_request/presentation/screens/hire_tutor_screen.dart';
 import '../features/job_request/presentation/screens/my_requests_screen.dart';
 import '../features/tutor_directory/presentation/screens/find_tutors_screen.dart';
+import '../features/student_dashboard/presentation/screens/student_main_layout.dart';
+import '../features/student_dashboard/presentation/screens/student_profile_screen.dart';
+import '../features/student_dashboard/presentation/screens/student_dashboard_content.dart';
+import '../features/tutor_dashboard/presentation/screens/tutor_main_layout.dart';
 
 GoRouter createAppRouter(AuthProvider authProvider) {
   return GoRouter(
