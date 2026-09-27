@@ -8,4 +8,6 @@ abstract class JobRepository {
     String? subject,
     int? minBudget,
   });
+
+  Stream<List<JobRequestModel>> getMyRequestsStream(String studentId);
 }

@@ -14,17 +14,9 @@ class TutorMainLayout extends StatefulWidget {
 class _TutorMainLayoutState extends State<TutorMainLayout> {
   int _currentIndex = 0;
 
-  final List<Widget> _screens = [
-    const TutorDashboardContent(),
-    const FindStudentsScreen(),
-    const Center(child: Text('Applications Screen - Coming Soon')), // Placeholder
-    const TutorProfileScreen(),
-  ];
-
   final List<String> _titles = [
     'Dashboard',
-    'Job Board',
-    'My Applications',
+    'Find Students',
     'My Profile',
   ];
 
@@ -37,16 +29,6 @@ class _TutorMainLayoutState extends State<TutorMainLayout> {
     return Scaffold(
       appBar: AppBar(
         title: Text(_titles[_currentIndex]),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('No new notifications')),
-              );
-            },
-          ),
-        ],
       ),
       drawer: Drawer(
         child: ListView(
@@ -84,37 +66,6 @@ class _TutorMainLayoutState extends State<TutorMainLayout> {
               ],
             ),
             ListTile(
-              leading: const Icon(Icons.payment_outlined),
-              title: const Text('Payments & Earnings'),
-              onTap: () {
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Payments coming soon'))
-                );
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.settings_outlined),
-              title: const Text('Settings'),
-              onTap: () {
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Settings coming soon'))
-                );
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.help_outline),
-              title: const Text('Support'),
-              onTap: () {
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Support coming soon'))
-                );
-              },
-            ),
-            const Divider(),
-            ListTile(
               leading: const Icon(Icons.logout),
               title: const Text('Sign Out'),
               onTap: () {
@@ -127,7 +78,17 @@ class _TutorMainLayoutState extends State<TutorMainLayout> {
       ),
       body: IndexedStack(
         index: _currentIndex,
-        children: _screens,
+        children: [
+          TutorDashboardContent(
+            onBrowseTuitions: () {
+              setState(() {
+                _currentIndex = 1;
+              });
+            },
+          ),
+          const FindStudentsScreen(),
+          const TutorProfileScreen(),
+        ],
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
@@ -146,12 +107,7 @@ class _TutorMainLayoutState extends State<TutorMainLayout> {
           BottomNavigationBarItem(
             icon: Icon(Icons.search_outlined),
             activeIcon: Icon(Icons.search),
-            label: 'Job Board',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.assignment_outlined),
-            activeIcon: Icon(Icons.assignment),
-            label: 'Applications',
+            label: 'Find Students',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),

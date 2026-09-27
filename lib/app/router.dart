@@ -9,12 +9,7 @@ import '../features/auth/presentation/screens/detailed_registration_screen.dart'
 import '../features/auth/presentation/providers/auth_provider.dart';
 import '../features/onboarding/presentation/screens/student_onboarding_screen.dart';
 import '../features/onboarding/presentation/screens/tutor_onboarding_screen.dart';
-import '../features/onboarding/presentation/screens/institute_onboarding_screen.dart';
-import '../features/tutor_dashboard/presentation/screens/tutor_main_layout.dart';
-import '../features/dashboard/presentation/screens/institute_dashboard_screen.dart';
-import '../features/student_dashboard/presentation/screens/student_main_layout.dart';
-import '../features/student_dashboard/presentation/screens/student_dashboard_content.dart';
-import '../features/job_request/presentation/screens/hire_tutor_screen.dart';
+import '../features/job_request/presentation/screens/my_requests_screen.dart';
 import '../features/tutor_directory/presentation/screens/find_tutors_screen.dart';
 
 GoRouter createAppRouter(AuthProvider authProvider) {
@@ -46,7 +41,6 @@ GoRouter createAppRouter(AuthProvider authProvider) {
         final role = authProvider.user?.role;
         if (role == UserRole.studentGuardian && state.matchedLocation != '/onboarding/student') return '/onboarding/student';
         if (role == UserRole.tutor && state.matchedLocation != '/onboarding/tutor') return '/onboarding/tutor';
-        if (role == UserRole.institute && state.matchedLocation != '/onboarding/institute') return '/onboarding/institute';
         return null; // Already on the right onboarding screen
       }
 
@@ -55,16 +49,16 @@ GoRouter createAppRouter(AuthProvider authProvider) {
         final loc = state.matchedLocation;
 
         if (role == UserRole.studentGuardian) {
-          if (!loc.startsWith('/dashboard/student') && loc != '/find-tutors' && loc != '/hire-tutor') {
+          if (!loc.startsWith('/dashboard/student') && 
+              loc != '/find-tutors' && 
+              loc != '/hire-tutor' && 
+              loc != '/student/profile' && 
+              loc != '/my-requests') {
             return '/dashboard/student';
           }
         } else if (role == UserRole.tutor) {
           if (!loc.startsWith('/dashboard/tutor')) {
             return '/dashboard/tutor';
-          }
-        } else if (role == UserRole.institute) {
-          if (!loc.startsWith('/dashboard/institute')) {
-            return '/dashboard/institute';
           }
         }
       }
@@ -115,13 +109,21 @@ GoRouter createAppRouter(AuthProvider authProvider) {
         builder: (context, state) => const TutorOnboardingScreen(),
       ),
       GoRoute(
-        path: '/onboarding/institute',
-        builder: (context, state) => const InstituteOnboardingScreen(),
-      ),
-      GoRoute(
         path: '/dashboard/student',
         builder: (context, state) => const StudentMainLayout(
           child: StudentDashboardContent(),
+        ),
+      ),
+      GoRoute(
+        path: '/student/profile',
+        builder: (context, state) => const StudentMainLayout(
+          child: StudentProfileScreen(),
+        ),
+      ),
+      GoRoute(
+        path: '/my-requests',
+        builder: (context, state) => const StudentMainLayout(
+          child: MyRequestsScreen(),
         ),
       ),
       GoRoute(
@@ -135,10 +137,6 @@ GoRouter createAppRouter(AuthProvider authProvider) {
       GoRoute(
         path: '/dashboard/tutor',
         builder: (context, state) => const TutorMainLayout(),
-      ),
-      GoRoute(
-        path: '/dashboard/institute',
-        builder: (context, state) => const InstituteDashboardScreen(),
       ),
     ],
   );

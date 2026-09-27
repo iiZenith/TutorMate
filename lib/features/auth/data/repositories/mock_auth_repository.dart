@@ -57,6 +57,10 @@ class MockAuthRepository implements AuthRepository {
     required String email,
     required String password,
     required UserRole role,
+    String? phoneNumber,
+    String? gender,
+    String? district,
+    String? area,
   }) async {
     await _simulateNetworkDelay();
     

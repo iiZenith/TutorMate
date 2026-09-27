@@ -43,9 +43,34 @@ class TutorProfileScreen extends StatelessWidget {
   }
 }
 
-class _PersonalTab extends StatelessWidget {
+class _PersonalTab extends StatefulWidget {
   final dynamic user;
   const _PersonalTab({required this.user});
+
+  @override
+  State<_PersonalTab> createState() => _PersonalTabState();
+}
+
+class _PersonalTabState extends State<_PersonalTab> {
+  late final TextEditingController _nameController;
+  late final TextEditingController _emailController;
+  late final TextEditingController _phoneController;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: widget.user?.fullName);
+    _emailController = TextEditingController(text: widget.user?.email);
+    _phoneController = TextEditingController(text: widget.user?.phoneNumber);
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _phoneController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -78,11 +103,11 @@ class _PersonalTab extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AppSpacing.xl),
-          AppTextField(label: 'Full Name', controller: TextEditingController(text: user?.fullName)),
+          AppTextField(label: 'Full Name', controller: _nameController),
           const SizedBox(height: AppSpacing.md),
-          AppTextField(label: 'Email', controller: TextEditingController(text: user?.email)),
+          AppTextField(label: 'Email', controller: _emailController),
           const SizedBox(height: AppSpacing.md),
-          AppTextField(label: 'Phone Number', controller: TextEditingController()),
+          AppTextField(label: 'Phone Number', controller: _phoneController),
           const SizedBox(height: AppSpacing.md),
           AppDropdown(
             label: 'City',
@@ -98,8 +123,23 @@ class _PersonalTab extends StatelessWidget {
   }
 }
 
-class _EducationTab extends StatelessWidget {
+class _EducationTab extends StatefulWidget {
   const _EducationTab();
+
+  @override
+  State<_EducationTab> createState() => _EducationTabState();
+}
+
+class _EducationTabState extends State<_EducationTab> {
+  final _institutionController = TextEditingController();
+  final _experienceController = TextEditingController();
+
+  @override
+  void dispose() {
+    _institutionController.dispose();
+    _experienceController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -116,9 +156,9 @@ class _EducationTab extends StatelessWidget {
             onChanged: (v) {},
           ),
           const SizedBox(height: AppSpacing.md),
-          const AppTextField(label: 'Current Institution / University'),
+          AppTextField(label: 'Current Institution / University', controller: _institutionController),
           const SizedBox(height: AppSpacing.md),
-          const AppTextField(label: 'Years of Experience', keyboardType: TextInputType.number),
+          AppTextField(label: 'Years of Experience', keyboardType: TextInputType.number, controller: _experienceController),
           
           const SizedBox(height: AppSpacing.xl),
           Row(
@@ -134,13 +174,7 @@ class _EducationTab extends StatelessWidget {
               ),
             ],
           ),
-          Card(
-            child: ListTile(
-              title: const Text('Mathematics'),
-              subtitle: const Text('Secondary (SEE)'),
-              trailing: IconButton(icon: const Icon(Icons.delete_outline, color: Colors.red), onPressed: (){}),
-            ),
-          ),
+          const Center(child: Text('No subjects added')),
           const SizedBox(height: AppSpacing.xl),
           AppButton(text: 'Save Education & Experience', onPressed: () {}),
         ],
@@ -149,8 +183,23 @@ class _EducationTab extends StatelessWidget {
   }
 }
 
-class _PricingTab extends StatelessWidget {
+class _PricingTab extends StatefulWidget {
   const _PricingTab();
+
+  @override
+  State<_PricingTab> createState() => _PricingTabState();
+}
+
+class _PricingTabState extends State<_PricingTab> {
+  final _monthlyFeeController = TextEditingController();
+  final _hourlyFeeController = TextEditingController();
+
+  @override
+  void dispose() {
+    _monthlyFeeController.dispose();
+    _hourlyFeeController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -162,14 +211,16 @@ class _PricingTab extends StatelessWidget {
         children: [
           Text('Pricing', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
           const SizedBox(height: AppSpacing.md),
-          const AppTextField(
+          AppTextField(
             label: 'Expected Minimum Monthly Fee (Rs.)',
             keyboardType: TextInputType.number,
+            controller: _monthlyFeeController,
           ),
           const SizedBox(height: AppSpacing.md),
-          const AppTextField(
+          AppTextField(
             label: 'Expected Minimum Hourly Fee (Rs.)',
             keyboardType: TextInputType.number,
+            controller: _hourlyFeeController,
           ),
           
           const SizedBox(height: AppSpacing.xl),

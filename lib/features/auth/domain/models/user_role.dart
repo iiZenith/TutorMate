@@ -6,10 +6,6 @@ enum UserRole {
   tutor(
     label: 'Independent Tutor',
     description: 'Providing personalized tutoring services',
-  ),
-  institute(
-    label: 'Educational Institute',
-    description: 'Managing educational programs and multiple tutors',
   );
 
   final String label;

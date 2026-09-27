@@ -31,12 +31,6 @@ class LandingScreen extends StatelessWidget {
             isSecondary: true,
             onPressed: () => context.push('/quick-entry?role=Tutor'),
           ),
-          const SizedBox(height: 16),
-          AppButton(
-            text: 'Register Institute',
-            isSecondary: true,
-            onPressed: () => context.push('/quick-entry?role=Institute'),
-          ),
           const SizedBox(height: 24),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,

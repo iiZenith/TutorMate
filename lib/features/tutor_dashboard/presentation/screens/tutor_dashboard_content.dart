@@ -5,7 +5,9 @@ import '../../../../core/theme/app_radii.dart';
 import '../../../../core/theme/app_colors.dart';
 
 class TutorDashboardContent extends StatelessWidget {
-  const TutorDashboardContent({super.key});
+  final VoidCallback? onBrowseTuitions;
+
+  const TutorDashboardContent({super.key, this.onBrowseTuitions});
 
   @override
   Widget build(BuildContext context) {
@@ -49,25 +51,6 @@ class TutorDashboardContent extends StatelessWidget {
               ),
             ),
 
-          // Quick Summary Strip
-          Container(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surface,
-              borderRadius: AppRadii.borderRadiusMedium,
-              border: Border.all(color: theme.dividerTheme.color ?? theme.colorScheme.outline.withValues(alpha: 0.1)),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                const _SummaryItem(title: 'Active Students', value: '0'),
-                Container(height: 30, width: 1, color: theme.dividerTheme.color ?? theme.colorScheme.outline.withValues(alpha: 0.2)),
-                const _SummaryItem(title: 'Applications', value: '0'),
-                Container(height: 30, width: 1, color: theme.dividerTheme.color ?? theme.colorScheme.outline.withValues(alpha: 0.2)),
-                const _SummaryItem(title: 'Earnings', value: 'Rs. 0'),
-              ],
-            ),
-          ),
           const SizedBox(height: AppSpacing.xl),
 
           // Primary Focus Card
@@ -78,9 +61,9 @@ class TutorDashboardContent extends StatelessWidget {
             color: theme.colorScheme.primary,
             child: InkWell(
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Switching to Job Board...')),
-                );
+                if (onBrowseTuitions != null) {
+                  onBrowseTuitions!();
+                }
               },
               borderRadius: AppRadii.borderRadiusLarge,
               child: Padding(
@@ -144,31 +127,6 @@ class TutorDashboardContent extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _SummaryItem extends StatelessWidget {
-  final String title;
-  final String value;
-
-  const _SummaryItem({required this.title, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Column(
-      children: [
-        Text(
-          value,
-          style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.primary),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          title,
-          style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
-        ),
-      ],
     );
   }
 }

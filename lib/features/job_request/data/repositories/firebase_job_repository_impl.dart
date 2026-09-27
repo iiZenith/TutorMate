@@ -45,4 +45,19 @@ class FirebaseJobRepositoryImpl implements JobRepository {
       return jobs;
     });
   }
+
+  @override
+  Stream<List<JobRequestModel>> getMyRequestsStream(String studentId) {
+    return _firestore
+        .collection('job_requests')
+        .where('studentId', isEqualTo: studentId)
+        .snapshots()
+        .map((snapshot) {
+      final jobs = snapshot.docs.map((doc) {
+        return JobRequestModel.fromMap(doc.data(), doc.id);
+      }).toList();
+      jobs.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      return jobs;
+    });
+  }
 }
