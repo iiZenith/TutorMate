@@ -6,6 +6,7 @@ import '../../../../shared/widgets/dynamic_location_selector.dart';
 import '../../../../shared/widgets/dynamic_subject_selector.dart';
 import '../../../../shared/widgets/app_text_field.dart';
 import '../../../job_request/domain/models/job_request_model.dart';
+import '../../../job_request/domain/models/tutor_interest_model.dart';
 import '../../../job_request/data/repositories/firebase_job_repository_impl.dart';
 import '../../../../app/app.dart';
 
@@ -140,6 +141,7 @@ class _FindStudentsScreenState extends State<FindStudentsScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final user = AuthProviderInherited.of(context).user;
 
     return Scaffold(
       appBar: AppBar(
@@ -152,44 +154,55 @@ class _FindStudentsScreenState extends State<FindStudentsScreen> {
           const SizedBox(width: AppSpacing.md),
         ],
       ),
-      body: StreamBuilder<List<JobRequestModel>>(
-        stream: _repository.getOpenJobsStream(
-          district: _location.district.isNotEmpty ? _location.district : null,
-          subject: _selectedSubject,
-          minBudget: _minBudget,
-        ),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
-            return Center(child: Text('Error loading requests.\n${snapshot.error}', textAlign: TextAlign.center));
-          }
+      body: StreamBuilder<List<TutorInterestModel>>(
+        stream: user != null ? _repository.getMyInterestsStream(user.id) : const Stream.empty(),
+        builder: (context, interestsSnapshot) {
+          final appliedJobIds = (interestsSnapshot.data ?? []).map((i) => i.jobId).toSet();
 
-          final jobs = snapshot.data ?? [];
+          return StreamBuilder<List<JobRequestModel>>(
+            stream: _repository.getOpenJobsStream(
+              district: _location.district.isNotEmpty ? _location.district : null,
+              subject: _selectedSubject,
+              minBudget: _minBudget,
+            ),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (snapshot.hasError) {
+                return Center(child: Text('Error loading requests.\n${snapshot.error}', textAlign: TextAlign.center));
+              }
 
-          if (jobs.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.search_off_rounded, size: 64, color: theme.colorScheme.onSurface.withValues(alpha: 0.2)),
-                  const SizedBox(height: AppSpacing.md),
-                  Text(
-                    'No requests found matching your filters.',
-                    style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
-                    textAlign: TextAlign.center,
+              final jobs = snapshot.data ?? [];
+
+              if (jobs.isEmpty) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.search_off_rounded, size: 64, color: theme.colorScheme.onSurface.withValues(alpha: 0.2)),
+                      const SizedBox(height: AppSpacing.md),
+                      Text(
+                        'No requests found matching your filters.',
+                        style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            );
-          }
+                );
+              }
 
-          return ListView.builder(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            itemCount: jobs.length,
-            itemBuilder: (context, index) {
-              return _StudentRequestCard(job: jobs[index]);
+              return ListView.builder(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                itemCount: jobs.length,
+                itemBuilder: (context, index) {
+                  final job = jobs[index];
+                  return _StudentRequestCard(
+                    job: job,
+                    isApplied: appliedJobIds.contains(job.jobId),
+                  );
+                },
+              );
             },
           );
         },
@@ -200,8 +213,12 @@ class _FindStudentsScreenState extends State<FindStudentsScreen> {
 
 class _StudentRequestCard extends StatefulWidget {
   final JobRequestModel job;
+  final bool isApplied;
 
-  const _StudentRequestCard({required this.job});
+  const _StudentRequestCard({
+    required this.job,
+    this.isApplied = false,
+  });
 
   @override
   State<_StudentRequestCard> createState() => _StudentRequestCardState();
@@ -284,13 +301,19 @@ class _StudentRequestCardState extends State<_StudentRequestCard> {
             const SizedBox(height: AppSpacing.lg),
             SizedBox(
               width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _isLoading ? null : _expressInterest,
-                style: ElevatedButton.styleFrom(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadii.large)),
-                ),
-                child: _isLoading ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2)) : const Text('Express Interest'),
-              ),
+              child: widget.isApplied
+                  ? OutlinedButton.icon(
+                      onPressed: null,
+                      icon: const Icon(Icons.check_circle_outline, color: Colors.green),
+                      label: const Text('Interest Expressed', style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
+                    )
+                  : ElevatedButton(
+                      onPressed: _isLoading ? null : _expressInterest,
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadii.large)),
+                      ),
+                      child: _isLoading ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2)) : const Text('Express Interest'),
+                    ),
             ),
           ],
         ),

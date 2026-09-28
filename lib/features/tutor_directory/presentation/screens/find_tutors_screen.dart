@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_radii.dart';
 import '../../../../shared/widgets/app_button.dart';
@@ -283,14 +284,12 @@ class _TutorProfileCard extends StatelessWidget {
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Message request sent to ${tutor.fullName}')),
-                    );
+                    context.push('/hire-tutor');
                   },
                   style: ElevatedButton.styleFrom(
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadii.large)),
                   ),
-                  child: const Text('Request'),
+                  child: const Text('Hire Tutor'),
                 ),
               ],
             ),
