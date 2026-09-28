@@ -230,26 +230,32 @@ class FirebaseAuthRepositoryImpl implements AuthRepository {
   @override
   Future<void> updateStudentProfile({
     required String userId,
-    required String studentType,
-    required String studentGradeLevel,
-    required List<String> subjects,
+    String? fullName,
+    String? phoneNumber,
+    String? gender,
+    String? studentType,
+    String? studentGradeLevel,
+    List<String>? subjects,
     String? province,
-    required String district,
-    required String area,
+    String? district,
+    String? area,
   }) async {
     try {
-      final updates = <String, dynamic>{
-        'studentType': studentType,
-        'studentGradeLevel': studentGradeLevel,
-        'subjects': subjects,
-        'district': district,
-        'area': area,
-      };
-      if (province != null && province.isNotEmpty) {
-        updates['province'] = province;
+      final updates = <String, dynamic>{};
+      if (fullName != null) updates['fullName'] = fullName;
+      if (phoneNumber != null) updates['phoneNumber'] = phoneNumber;
+      if (gender != null) updates['gender'] = gender;
+      if (studentType != null) updates['studentType'] = studentType;
+      if (studentGradeLevel != null) updates['studentGradeLevel'] = studentGradeLevel;
+      if (subjects != null) updates['subjects'] = subjects;
+      if (province != null) updates['province'] = province;
+      if (district != null) updates['district'] = district;
+      if (area != null) updates['area'] = area;
+
+      if (updates.isNotEmpty) {
+        await _firestore.collection('users').doc(userId).update(updates);
+        _cachedUser = await _fetchAppUser(userId);
       }
-      await _firestore.collection('users').doc(userId).update(updates);
-      _cachedUser = await _fetchAppUser(userId);
     } catch (e) {
       throw AuthException('Failed to update student profile: $e');
     }

@@ -168,18 +168,24 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<void> updateStudentProfile({
-    required String studentType,
-    required String studentGradeLevel,
-    required List<String> subjects,
+    String? fullName,
+    String? phoneNumber,
+    String? gender,
+    String? studentType,
+    String? studentGradeLevel,
+    List<String>? subjects,
     String? province,
-    required String district,
-    required String area,
+    String? district,
+    String? area,
   }) async {
     if (_user == null) return;
     _setLoading();
     try {
       await _repository.updateStudentProfile(
         userId: _user!.id,
+        fullName: fullName,
+        phoneNumber: phoneNumber,
+        gender: gender,
         studentType: studentType,
         studentGradeLevel: studentGradeLevel,
         subjects: subjects,

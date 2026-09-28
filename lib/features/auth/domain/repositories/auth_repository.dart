@@ -38,12 +38,15 @@ abstract class AuthRepository {
 
   Future<void> updateStudentProfile({
     required String userId,
-    required String studentType,
-    required String studentGradeLevel,
-    required List<String> subjects,
-    required String province,
-    required String district,
-    required String area,
+    String? fullName,
+    String? phoneNumber,
+    String? gender,
+    String? studentType,
+    String? studentGradeLevel,
+    List<String>? subjects,
+    String? province,
+    String? district,
+    String? area,
   });
 
   Future<void> updateTutorProfile({
