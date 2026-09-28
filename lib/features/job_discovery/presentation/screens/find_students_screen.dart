@@ -170,38 +170,72 @@ class _FindStudentsScreenState extends State<FindStudentsScreen> {
                 return const Center(child: CircularProgressIndicator());
               }
               if (snapshot.hasError) {
-                return Center(child: Text('Error loading requests.\n${snapshot.error}', textAlign: TextAlign.center));
+                return Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(AppSpacing.lg),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.error_outline, size: 48, color: theme.colorScheme.error),
+                        const SizedBox(height: AppSpacing.md),
+                        Text(
+                          'Error loading requests.\n${snapshot.error}',
+                          textAlign: TextAlign.center,
+                          style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.error),
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                        ElevatedButton.icon(
+                          onPressed: () => setState(() {}),
+                          icon: const Icon(Icons.refresh),
+                          label: const Text('Retry'),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
               }
 
               final jobs = snapshot.data ?? [];
 
               if (jobs.isEmpty) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.search_off_rounded, size: 64, color: theme.colorScheme.onSurface.withValues(alpha: 0.2)),
-                      const SizedBox(height: AppSpacing.md),
-                      Text(
-                        'No requests found matching your filters.',
-                        style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
-                        textAlign: TextAlign.center,
+                return RefreshIndicator(
+                  onRefresh: () async => setState(() {}),
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.7,
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.search_off_rounded, size: 64, color: theme.colorScheme.onSurface.withValues(alpha: 0.2)),
+                            const SizedBox(height: AppSpacing.md),
+                            Text(
+                              'No requests found matching your filters.',
+                              style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
                       ),
-                    ],
+                    ),
                   ),
                 );
               }
 
-              return ListView.builder(
-                padding: const EdgeInsets.all(AppSpacing.md),
-                itemCount: jobs.length,
-                itemBuilder: (context, index) {
-                  final job = jobs[index];
-                  return _StudentRequestCard(
-                    job: job,
-                    isApplied: appliedJobIds.contains(job.jobId),
-                  );
-                },
+              return RefreshIndicator(
+                onRefresh: () async => setState(() {}),
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  itemCount: jobs.length,
+                  itemBuilder: (context, index) {
+                    final job = jobs[index];
+                    return _StudentRequestCard(
+                      job: job,
+                      isApplied: appliedJobIds.contains(job.jobId),
+                    );
+                  },
+                ),
               );
             },
           );

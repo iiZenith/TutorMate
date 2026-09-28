@@ -133,13 +133,26 @@ class FirebaseJobRepositoryImpl implements JobRepository {
 
     final batch = _firestore.batch();
     
-    // Update interest status to accepted
+    // Update target interest status to accepted
     final interestRef = _firestore.collection('tutor_interests').doc(interestId);
     batch.update(interestRef, {'status': 'accepted'});
 
     // Update job status to accepted
     final jobRef = _firestore.collection('job_requests').doc(jobId);
     batch.update(jobRef, {'status': 'accepted'});
+
+    // Reject all other pending interests for this job
+    final otherInterests = await _firestore
+        .collection('tutor_interests')
+        .where('jobId', isEqualTo: jobId)
+        .where('status', isEqualTo: 'submitted')
+        .get();
+
+    for (var doc in otherInterests.docs) {
+      if (doc.id != interestId) {
+        batch.update(doc.reference, {'status': 'rejected'});
+      }
+    }
 
     await batch.commit();
   }

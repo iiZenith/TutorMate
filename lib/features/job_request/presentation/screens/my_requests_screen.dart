@@ -33,10 +33,26 @@ class _MyRequestsScreenState extends State<MyRequestsScreen> {
         }
         if (snapshot.hasError) {
           return Center(
-            child: Text(
-              'Error loading your requests.\n${snapshot.error}',
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.error),
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.error_outline, size: 48, color: theme.colorScheme.error),
+                  const SizedBox(height: AppSpacing.md),
+                  Text(
+                    'Error loading your requests.\n${snapshot.error}',
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.error),
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  ElevatedButton.icon(
+                    onPressed: () => setState(() {}),
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Retry'),
+                  ),
+                ],
+              ),
             ),
           );
         }
@@ -44,26 +60,37 @@ class _MyRequestsScreenState extends State<MyRequestsScreen> {
         final requests = snapshot.data ?? [];
 
         if (requests.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.assignment_add, size: 64, color: theme.colorScheme.onSurface.withValues(alpha: 0.2)),
-                const SizedBox(height: AppSpacing.md),
-                Text(
-                  'You haven\'t posted any requests yet.',
-                  style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
-                  textAlign: TextAlign.center,
+          return RefreshIndicator(
+            onRefresh: () async => setState(() {}),
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: SizedBox(
+                height: MediaQuery.of(context).size.height * 0.7,
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.assignment_add, size: 64, color: theme.colorScheme.onSurface.withValues(alpha: 0.2)),
+                      const SizedBox(height: AppSpacing.md),
+                      Text(
+                        'You haven\'t posted any requests yet.',
+                        style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
                 ),
-              ],
+              ),
             ),
           );
         }
 
-        return ListView.builder(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          itemCount: requests.length,
-          itemBuilder: (context, index) {
+        return RefreshIndicator(
+          onRefresh: () async => setState(() {}),
+          child: ListView.builder(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            itemCount: requests.length,
+            itemBuilder: (context, index) {
             final job = requests[index];
             return Card(
               elevation: 4,
