@@ -168,4 +168,19 @@ class FirebaseJobRepositoryImpl implements JobRepository {
       'status': 'rejected',
     });
   }
+
+  @override
+  Future<void> cancelJobRequest({
+    required String jobId,
+    required String studentId,
+  }) async {
+    final jobDoc = await _firestore.collection('job_requests').doc(jobId).get();
+    if (!jobDoc.exists || jobDoc.data()?['studentId'] != studentId) {
+      throw Exception('Unauthorized or job request not found.');
+    }
+
+    await _firestore.collection('job_requests').doc(jobId).update({
+      'status': 'cancelled',
+    });
+  }
 }

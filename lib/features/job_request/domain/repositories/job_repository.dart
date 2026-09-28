@@ -32,4 +32,9 @@ abstract class JobRepository {
     required String interestId,
     required String studentId,
   });
+
+  Future<void> cancelJobRequest({
+    required String jobId,
+    required String studentId,
+  });
 }

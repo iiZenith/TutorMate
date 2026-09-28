@@ -56,6 +56,51 @@ class _RequestDetailsScreenState extends State<RequestDetailsScreen> {
     }
   }
 
+  void _cancelRequest() async {
+    final user = AuthProviderInherited.of(context).user;
+    if (user == null) return;
+
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Cancel Request'),
+        content: const Text('Are you sure you want to cancel this tuition request?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('No'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Yes, Cancel'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      try {
+        await _repository.cancelJobRequest(
+          jobId: widget.job.jobId,
+          studentId: user.id,
+        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Request cancelled successfully.')),
+          );
+          context.pop();
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to cancel request: $e')),
+          );
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -85,6 +130,17 @@ class _RequestDetailsScreenState extends State<RequestDetailsScreen> {
                     Text('Grade: ${widget.job.grade}'),
                     Text('Location: ${widget.job.district} - ${widget.job.area}'),
                     Text('Budget: Rs. ${widget.job.budgetNpr} / month'),
+                    if (widget.job.status == 'open') ...[
+                      const SizedBox(height: AppSpacing.md),
+                      OutlinedButton.icon(
+                        icon: const Icon(Icons.cancel_outlined, color: Colors.red),
+                        label: const Text('Cancel Request', style: TextStyle(color: Colors.red)),
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: Colors.red),
+                        ),
+                        onPressed: _cancelRequest,
+                      ),
+                    ],
                   ],
                 ),
               ),
