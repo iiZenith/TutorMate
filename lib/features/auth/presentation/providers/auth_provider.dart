@@ -15,7 +15,6 @@ enum AuthState {
 
 class AuthProvider extends ChangeNotifier {
   final AuthRepository _repository;
-  
   AuthState _state = AuthState.initial;
   AppUser? _user;
   String? _errorMessage;
@@ -30,9 +29,7 @@ class AuthProvider extends ChangeNotifier {
   bool get isLoading => _state == AuthState.authenticating || _state == AuthState.initial;
 
   Future<void> _init() async {
-    // Artificial splash delay
     await Future.delayed(const Duration(seconds: 2));
-    
     _repository.authStateChanges.listen((appUser) {
       _user = appUser;
       if (appUser == null) {
@@ -51,8 +48,7 @@ class AuthProvider extends ChangeNotifier {
       _errorMessage = error.toString();
       notifyListeners();
     });
-    
-    // Set initial state
+
     try {
       if (_repository.currentUser == null) {
         _state = AuthState.unauthenticated;
@@ -61,7 +57,9 @@ class AuthProvider extends ChangeNotifier {
         if (!_user!.isEmailVerified) {
           _state = AuthState.needsVerification;
         } else {
-          _state = _user!.isProfileComplete ? AuthState.authenticated : AuthState.needsOnboarding;
+          _state = _user!.isProfileComplete
+              ? AuthState.authenticated
+              : AuthState.needsOnboarding;
         }
       }
     } catch (e) {
@@ -90,22 +88,20 @@ class AuthProvider extends ChangeNotifier {
         email: email,
         password: password,
       );
-
       if (expectedRole != null && loggedInUser.role != expectedRole) {
         await _repository.signOut();
         _setError('The selected account type does not match this account.');
         return;
       }
-      // The stream listener will handle the state update
     } catch (e) {
       _setError(e.toString());
     }
   }
 
   Future<void> register(
-    String fullName, 
-    String email, 
-    String password, 
+    String fullName,
+    String email,
+    String password,
     UserRole role, {
     String? phoneNumber,
     String? gender,
@@ -124,7 +120,6 @@ class AuthProvider extends ChangeNotifier {
         district: district,
         area: area,
       );
-      // The stream listener will handle the state update
     } catch (e) {
       _setError(e.toString());
     }
@@ -142,10 +137,10 @@ class AuthProvider extends ChangeNotifier {
   Future<void> reloadUser() async {
     _setLoading();
     try {
-      // In a real app we'd call _repository.reload() which calls FirebaseAuth.instance.currentUser?.reload()
-      // Let's assume _repository.reload() is implemented
       await _repository.reloadAuthUser();
-      // The stream might trigger, or we fetch currentUser
+      _user = _repository.currentUser;
+      _setStateFromUser();
+      notifyListeners();
     } catch (e) {
       _setError(e.toString());
     }
@@ -158,12 +153,25 @@ class AuthProvider extends ChangeNotifier {
       throw Exception(e.toString());
     }
   }
+
   Future<void> sendPasswordReset(String email) async {
     try {
       await _repository.sendPasswordResetEmail(email: email);
     } catch (e) {
-      // Re-throw so UI can show a snackbar instead of changing the global state to error
       throw Exception(e.toString());
+    }
+  }
+
+  void _setStateFromUser() {
+    final user = _user;
+    if (user == null) {
+      _state = AuthState.unauthenticated;
+    } else if (!user.isEmailVerified) {
+      _state = AuthState.needsVerification;
+    } else if (!user.isProfileComplete) {
+      _state = AuthState.needsOnboarding;
+    } else {
+      _state = AuthState.authenticated;
     }
   }
 
@@ -194,9 +202,7 @@ class AuthProvider extends ChangeNotifier {
         area: area,
       );
       _user = _repository.currentUser;
-      if (_user?.isProfileComplete == true) {
-        _state = AuthState.authenticated;
-      }
+      _setStateFromUser();
       notifyListeners();
     } catch (e) {
       _setError(e.toString());
@@ -248,9 +254,7 @@ class AuthProvider extends ChangeNotifier {
         isProfileComplete: isProfileComplete,
       );
       _user = _repository.currentUser;
-      if (_user?.isProfileComplete == true) {
-        _state = AuthState.authenticated;
-      }
+      _setStateFromUser();
       notifyListeners();
     } catch (e) {
       _setError(e.toString());
@@ -261,10 +265,8 @@ class AuthProvider extends ChangeNotifier {
     if (_user == null) return;
     _setLoading();
     try {
-      // Re-fetch user to get latest state from backend
       await _repository.reloadAuthUser();
       _user = _repository.currentUser;
-
       if (_user == null) throw Exception('User not found');
 
       bool isValid = false;
@@ -273,7 +275,6 @@ class AuthProvider extends ChangeNotifier {
       } else if (_user!.role == UserRole.tutor) {
         isValid = _user!.isValidTutorProfile;
       }
-
       if (!isValid) {
         throw Exception('Profile is incomplete. Please fill all required fields.');
       }
